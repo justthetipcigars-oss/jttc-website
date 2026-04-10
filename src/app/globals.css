@@ -1,7 +1,46 @@
 @import "tailwindcss";
-@import "@fontsource/playfair-display/400.css";
-@import "@fontsource/playfair-display/700.css";
-@import "@fontsource/playfair-display/400-italic.css";
+
+/* Cazon Font Family */
+@font-face {
+  font-family: 'Cazon';
+  src: url('/fonts/cazon/Cazon-Negra.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cazon';
+  src: url('/fonts/cazon/Cazon-Gris.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cazon';
+  src: url('/fonts/cazon/Cazon-Tres.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cazon';
+  src: url('/fonts/cazon/Cazon-Dos.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cazon';
+  src: url('/fonts/cazon/Cazon-Uno.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'CazonDingbats';
+  src: url('/fonts/cazon/Cazon-DingbatsA.otf') format('opentype');
+  font-display: swap;
+}
 
 @theme inline {
   /* Brand Colors */
@@ -19,7 +58,7 @@
   --color-smoke:        #8C8078;
 
   /* Typography */
-  --font-display: "Playfair Display", Georgia, serif;
+  --font-display: "Cazon", Georgia, serif;
   --font-body: "Inter", system-ui, sans-serif;
 
   /* Spacing / radius */
@@ -48,6 +87,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   line-height: 1.2;
   color: var(--color-cream);
+  font-weight: 900;
+}
+
+h2, h3 {
+  font-weight: 600;
 }
 
 /* Scrollbar styling */
