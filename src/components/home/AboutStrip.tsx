@@ -44,16 +44,16 @@ export default function AboutStrip() {
           </div>
 
           <h2
-            className="mb-6"
+            className="display mb-6"
             style={{
-              fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+              fontWeight: 600,
               color: 'var(--color-cream)',
               lineHeight: 1.2,
             }}
           >
             More Than a Smoke Shop.<br />
-            <span style={{ fontStyle: 'italic', color: 'var(--color-terracotta)' }}>It's Your Third Place.</span>
+            <span style={{ color: 'var(--color-terracotta)' }}>It's Your Third Place.</span>
           </h2>
 
           <div style={{ color: 'var(--color-smoke)', lineHeight: 1.9, fontSize: '0.95rem' }}>

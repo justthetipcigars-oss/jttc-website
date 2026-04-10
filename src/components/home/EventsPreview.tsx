@@ -37,15 +37,16 @@ export default function EventsPreview() {
               At the Lounge
             </div>
             <h2
+              className="display"
               style={{
-                fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+                fontWeight: 600,
                 color: 'var(--color-cream)',
                 lineHeight: 1.2,
               }}
             >
               Coming Up<br />
-              <span style={{ fontStyle: 'italic', color: 'var(--color-terracotta)' }}>Don't Miss Out</span>
+              <span style={{ color: 'var(--color-terracotta)' }}>Don't Miss Out</span>
             </h2>
           </div>
           <Link
@@ -97,9 +98,8 @@ export default function EventsPreview() {
                   </span>
                 </div>
                 <h3
-                  className="mb-2"
+                  className="mb-2 font-semibold"
                   style={{
-                    fontFamily: 'var(--font-display)',
                     color: 'var(--color-cream)',
                     fontSize: '1.2rem',
                   }}

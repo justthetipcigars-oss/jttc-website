@@ -53,26 +53,24 @@ export default function Hero() {
           <span className="w-8 h-px" style={{ background: 'var(--color-terracotta)' }} />
         </div>
 
-        {/* Headline */}
+        {/* Headline — Cazon-Gris, big display only */}
         <h1
-          className="mb-6"
+          className="display mb-6"
           style={{
-            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-            fontWeight: 700,
+            fontWeight: 600,
             color: 'var(--color-cream)',
             lineHeight: 1.1,
           }}
         >
           Just The Tip<br />
-          <span style={{ color: 'var(--color-terracotta)', fontStyle: 'italic' }}>Cigars</span>
+          <span style={{ color: 'var(--color-terracotta)' }}>Cigars</span>
         </h1>
 
-        {/* Tagline */}
+        {/* Tagline — body font, italic */}
         <p
           className="mb-10 max-w-xl mx-auto"
           style={{
-            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
             color: 'var(--color-cream-dark)',
             fontStyle: 'italic',

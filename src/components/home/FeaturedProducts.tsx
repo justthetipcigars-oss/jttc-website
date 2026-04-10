@@ -22,15 +22,16 @@ export default function FeaturedProducts() {
               In the Humidor
             </div>
             <h2
+              className="display"
               style={{
-                fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+                fontWeight: 600,
                 color: 'var(--color-cream)',
                 lineHeight: 1.2,
               }}
             >
               Hand-Selected,<br />
-              <span style={{ fontStyle: 'italic', color: 'var(--color-terracotta)' }}>Worth Every Draw</span>
+              <span style={{ color: 'var(--color-terracotta)' }}>Worth Every Draw</span>
             </h2>
           </div>
           <Link
@@ -72,9 +73,8 @@ export default function FeaturedProducts() {
               <div className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3
-                    className="font-semibold leading-tight transition-colors group-hover:text-terracotta"
+                    className="font-semibold leading-tight"
                     style={{
-                      fontFamily: 'var(--font-display)',
                       color: 'var(--color-cream)',
                       fontSize: '1rem',
                     }}

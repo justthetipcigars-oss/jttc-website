@@ -60,6 +60,7 @@
   /* Typography */
   --font-display: "Cazon", Georgia, serif;
   --font-body: "Inter", system-ui, sans-serif;
+  --font-weight-display: 600;
 
   /* Spacing / radius */
   --radius-brand: 2px;
@@ -84,13 +85,14 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   line-height: 1.2;
   color: var(--color-cream);
-  font-weight: 900;
 }
 
-h2, h3 {
+/* Apply Cazon-Gris only to large display elements explicitly */
+.display {
+  font-family: var(--font-display);
   font-weight: 600;
 }
 

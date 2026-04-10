@@ -9,7 +9,7 @@ export default function Footer() {
 
         {/* Brand */}
         <div className="md:col-span-1">
-          <div style={{ fontFamily: 'var(--font-display)', color: 'var(--color-cream)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+          <div className="display" style={{ color: 'var(--color-cream)', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
             Just The Tip Cigars
           </div>
           <div style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem' }}>

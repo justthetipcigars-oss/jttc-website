@@ -31,10 +31,10 @@ export default function EmailSignup() {
         </div>
 
         <h2
-          className="mb-4"
+          className="display mb-4"
           style={{
-            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
+            fontWeight: 600,
             color: 'var(--color-cream)',
           }}
         >
