@@ -1,10 +1,18 @@
 'use client';
 
-const cards = [
+type Card = {
+  label: string;
+  desc: string;
+  href: string;
+  icon?: string;
+  img?: string;
+};
+
+const cards: Card[] = [
   { label: 'Purchase History', desc: 'In-store and online orders', href: '/account/history', icon: '🧾' },
   { label: 'Wishlist', desc: 'Saved cigars and notifications', href: '/account/wishlist', icon: '🔖' },
   { label: 'My Humidor', desc: 'Cigars in your collection', href: '/account/humidor', icon: '🗄️' },
-  { label: 'My Ashtray', desc: 'Cigars you have smoked', href: '/account/ashtray', icon: '🪨' },
+  { label: 'My Ashtray', desc: 'Cigars you have smoked', href: '/account/ashtray', img: '/images/icon-ashtray.png' },
   { label: 'Tasting Journal', desc: 'Your notes and ratings', href: '/account/journal', icon: '📓' },
 ];
 
@@ -26,7 +34,13 @@ export default function DashboardCards() {
           onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-terracotta)')}
           onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)')}
         >
-          <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{card.icon}</div>
+          <div style={{ marginBottom: '0.75rem' }}>
+            {card.img ? (
+              <img src={card.img} alt={card.label} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '2px' }} />
+            ) : (
+              <span style={{ fontSize: '1.75rem' }}>{card.icon}</span>
+            )}
+          </div>
           <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--color-cream)', fontSize: '1rem', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>
             {card.label}
           </div>
