@@ -13,7 +13,7 @@ const cards: Card[] = [
   { label: 'Wishlist', desc: 'Saved cigars and notifications', href: '/account/wishlist', icon: '🔖' },
   { label: 'My Humidor', desc: 'Cigars in your collection', href: '/account/humidor', img: '/images/icon-humidor.png' },
   { label: 'My Ashtray', desc: 'Cigars you have smoked', href: '/account/ashtray', img: '/images/icon-ashtray.png' },
-  { label: 'Tasting Journal', desc: 'Your notes and ratings', href: '/account/journal', icon: '📓' },
+  { label: 'Tasting Journal', desc: 'Your notes and ratings', href: '/account/journal', img: '/images/icon-journal.png' },
 ];
 
 export default function DashboardCards() {
