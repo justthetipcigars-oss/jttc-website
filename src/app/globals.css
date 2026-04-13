@@ -96,6 +96,21 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
 }
 
+/* Reviews infinite scroll */
+@keyframes reviews-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.reviews-track {
+  animation: reviews-scroll 150s linear infinite;
+}
+/* Pause on hover — desktop/mouse only, not on touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .reviews-track:hover {
+    animation-play-state: paused;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

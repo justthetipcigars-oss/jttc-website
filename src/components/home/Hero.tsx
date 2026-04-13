@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Hero() {
@@ -38,6 +39,21 @@ export default function Hero() {
           pointerEvents: 'none',
         }}
       />
+
+      {/* Cowboy watermark */}
+      <div
+        className="absolute right-0 bottom-0 pointer-events-none select-none"
+        style={{ opacity: 0.07, width: 'clamp(300px, 45vw, 650px)' }}
+      >
+        <Image
+          src="/images/23.svg"
+          alt=""
+          width={650}
+          height={430}
+          style={{ width: '100%', height: 'auto' }}
+          aria-hidden
+        />
+      </div>
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -113,15 +129,15 @@ export default function Hero() {
         {/* Hours teaser */}
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
-            MON–THU 11AM–9PM
+            MON–TUE 12PM–9PM
           </span>
           <span className="hidden sm:block w-1 h-1 rounded-full" style={{ background: 'var(--color-terracotta)' }} />
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
-            FRI–SAT 11AM–10PM
+            WED–SAT 10AM–9PM
           </span>
           <span className="hidden sm:block w-1 h-1 rounded-full" style={{ background: 'var(--color-terracotta)' }} />
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
-            SUN 12PM–7PM
+            SUN 12PM–9PM
           </span>
         </div>
       </div>

@@ -53,10 +53,10 @@ export default function AboutStrip() {
             }}
           >
             More Than a Smoke Shop.<br />
-            <span style={{ color: 'var(--color-terracotta)' }}>It's Your Third Place.</span>
+            <span style={{ color: 'var(--color-terracotta)' }}>Welcome to your new extended family!</span>
           </h2>
 
-          <div style={{ color: 'var(--color-smoke)', lineHeight: 1.9, fontSize: '0.95rem' }}>
+          <div style={{ color: 'var(--color-cream-dark)', lineHeight: 1.9, fontSize: '0.95rem' }}>
             <p className="mb-4">
               Just The Tip Cigars was built for the people who know that the best conversations happen
               with a good cigar in hand. We carry a hand-selected lineup of premium sticks, but what

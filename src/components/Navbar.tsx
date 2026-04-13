@@ -2,24 +2,58 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 const links = [
   { label: 'The Lounge', href: '/lounge' },
-  { label: 'Shop', href: '/shop' },
+  { label: 'Out of the Lounge', href: '/out-of-the-lounge' },
   { label: 'Events', href: '/events' },
-  { label: 'Our Story', href: '/story' },
+  { label: 'Our Story', href: '/our-story' },
   { label: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setLoggedIn(!!data.session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleAuthClick() {
+    if (loggedIn) {
+      await supabase.auth.signOut();
+      router.push('/');
+    } else {
+      router.push('/account/login');
+    }
+  }
+
+  const authButtonStyle = {
+    background: loggedIn ? 'transparent' : 'var(--color-terracotta)',
+    color: 'var(--color-cream)',
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase' as const,
+    border: loggedIn ? '1px solid var(--color-charcoal-mid)' : 'none',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  };
 
   return (
     <header
@@ -28,28 +62,33 @@ export default function Navbar() {
         background: scrolled ? 'rgba(14,12,10,0.97)' : 'transparent',
         borderBottom: scrolled ? '1px solid rgba(196,98,45,0.2)' : '1px solid transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        overflow: 'visible',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between" style={{ height: '80px' }}>
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          {/* Logo placeholder — replace with actual logo image */}
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center border transition-colors"
-            style={{ borderColor: 'var(--color-terracotta)', background: 'var(--color-charcoal)' }}
+            className="shrink-0"
+            style={{ filter: 'drop-shadow(0 0 10px rgba(196,98,45,0.7)) drop-shadow(0 0 20px rgba(196,98,45,0.4))' }}
           >
-            <span style={{ fontFamily: 'var(--font-display)', color: 'var(--color-terracotta)', fontSize: '0.5rem', letterSpacing: '0.05em', lineHeight: 1.2, textAlign: 'center' }}>
-              JTT
-            </span>
+            <img
+              src="/images/JTTC-LOGO-CIRCLE-CREAM.png"
+              alt="Just The Tip Cigars"
+              style={{ width: 56, height: 56, display: 'block' }}
+            />
           </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', color: 'var(--color-cream)', fontSize: '1rem', lineHeight: 1.1, letterSpacing: '0.02em' }}>
-              Just The Tip
-            </div>
-            <div style={{ color: 'var(--color-smoke)', fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-              Cigars
-            </div>
+          <div
+            className="display"
+            style={{
+              color: 'var(--color-cream)',
+              fontSize: '1.6rem',
+              lineHeight: 1.15,
+              letterSpacing: '0.03em',
+            }}
+          >
+            Just The Tip<br />Cigars
           </div>
         </Link>
 
@@ -70,17 +109,25 @@ export default function Navbar() {
           <Link
             href="/shop"
             className="px-5 py-2 text-sm font-semibold transition-all"
-            style={{
-              background: 'var(--color-terracotta)',
-              color: 'var(--color-cream)',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-            }}
+            style={{ background: 'var(--color-terracotta)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-terracotta-light)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-terracotta)')}
           >
             Shop Now
           </Link>
+          <button
+            onClick={handleAuthClick}
+            className="px-5 py-2 text-sm font-semibold transition-all"
+            style={authButtonStyle}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = loggedIn ? 'var(--color-charcoal)' : 'var(--color-terracotta-light)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = loggedIn ? 'transparent' : 'var(--color-terracotta)';
+            }}
+          >
+            {loggedIn ? 'Logout' : 'Login'}
+          </button>
         </nav>
 
         {/* Mobile hamburger */}
@@ -118,12 +165,19 @@ export default function Navbar() {
           ))}
           <Link
             href="/shop"
-            className="text-center py-3 text-sm font-semibold mt-2"
-            style={{ background: 'var(--color-terracotta)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            className="text-center py-3 text-sm font-semibold"
+            style={{ background: 'var(--color-terracotta)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none' }}
             onClick={() => setMenuOpen(false)}
           >
             Shop Now
           </Link>
+          <button
+            onClick={() => { setMenuOpen(false); handleAuthClick(); }}
+            className="text-center py-3 text-sm font-semibold"
+            style={authButtonStyle}
+          >
+            {loggedIn ? 'Logout' : 'Login'}
+          </button>
         </div>
       )}
     </header>

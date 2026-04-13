@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -9,8 +10,11 @@ export default function Footer() {
 
         {/* Brand */}
         <div className="md:col-span-1">
-          <div className="display" style={{ color: 'var(--color-cream)', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Just The Tip Cigars
+          <div className="flex items-center gap-3 mb-3">
+            <Image src="/images/10.svg" alt="Just The Tip Cigars" width={40} height={40} />
+            <div className="display" style={{ color: 'var(--color-cream)', fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.2 }}>
+              Just The Tip Cigars
+            </div>
           </div>
           <div style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem' }}>
             Premium Cigar Lounge
@@ -27,9 +31,9 @@ export default function Footer() {
           </h4>
           <div style={{ color: 'var(--color-smoke)', fontSize: '0.875rem', lineHeight: 2 }}>
             {/* TODO: Pull from Sanity CMS */}
-            <div className="flex justify-between gap-4"><span>Mon – Thu</span><span>11am – 9pm</span></div>
-            <div className="flex justify-between gap-4"><span>Fri – Sat</span><span>11am – 10pm</span></div>
-            <div className="flex justify-between gap-4"><span>Sunday</span><span>12pm – 7pm</span></div>
+            <div className="flex justify-between gap-4"><span>Mon – Tue</span><span>12pm – 9pm</span></div>
+            <div className="flex justify-between gap-4"><span>Wed – Sat</span><span>10am – 9pm</span></div>
+            <div className="flex justify-between gap-4"><span>Sunday</span><span>12pm – 9pm</span></div>
           </div>
         </div>
 
@@ -42,11 +46,10 @@ export default function Footer() {
             2550 Brownsville Road<br />
             South Park Township, PA<br />
             <a
-              href="tel:+1XXXXXXXXXX"
+              href="tel:+17249579229"
               style={{ color: 'var(--color-cream-dark)' }}
             >
-              {/* TODO: Add phone number */}
-              (XXX) XXX-XXXX
+              (724) 957-9229
             </a>
           </address>
           <a

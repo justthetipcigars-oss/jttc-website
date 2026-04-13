@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Hero from '@/components/home/Hero';
+import ReviewsScroller from '@/components/home/ReviewsScroller';
 import AboutStrip from '@/components/home/AboutStrip';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import EventsPreview from '@/components/home/EventsPreview';
@@ -12,6 +13,7 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <ReviewsScroller />
         <AboutStrip />
         <FeaturedProducts />
         <EventsPreview />
