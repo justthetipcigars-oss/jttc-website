@@ -9,7 +9,7 @@ type Card = {
 };
 
 const cards: Card[] = [
-  { label: 'Purchase History', desc: 'In-store and online orders', href: '/account/history', icon: '🧾' },
+  { label: 'Purchase History', desc: 'In-store and online orders', href: '/account/history', img: '/images/icon-history.png' },
   { label: 'Wishlist', desc: 'Saved cigars and notifications', href: '/account/wishlist', icon: '🔖' },
   { label: 'My Humidor', desc: 'Cigars in your collection', href: '/account/humidor', img: '/images/icon-humidor.png' },
   { label: 'My Ashtray', desc: 'Cigars you have smoked', href: '/account/ashtray', img: '/images/icon-ashtray.png' },
