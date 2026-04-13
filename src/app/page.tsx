@@ -14,10 +14,10 @@ export default function HomePage() {
       <main>
         <Hero />
         <ReviewsScroller />
+        <EmailSignup />
         <AboutStrip />
         <FeaturedProducts />
         <EventsPreview />
-        <EmailSignup />
       </main>
       <Footer />
     </>
