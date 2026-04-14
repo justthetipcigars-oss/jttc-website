@@ -45,16 +45,6 @@ export default function Navbar() {
     }
   }
 
-  const authButtonStyle = {
-    background: loggedIn ? 'transparent' : 'var(--color-terracotta)',
-    color: 'var(--color-cream)',
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase' as const,
-    border: loggedIn ? '1px solid var(--color-charcoal-mid)' : 'none',
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-  };
-
   return (
     <header
       className="fixed top-0 left-0 right-0 z-40 transition-all duration-500"
@@ -115,19 +105,38 @@ export default function Navbar() {
           >
             Shop Now
           </Link>
-          <button
-            onClick={handleAuthClick}
-            className="px-5 py-2 text-sm font-semibold transition-all"
-            style={authButtonStyle}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = loggedIn ? 'var(--color-charcoal)' : 'var(--color-terracotta-light)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = loggedIn ? 'transparent' : 'var(--color-terracotta)';
-            }}
-          >
-            {loggedIn ? 'Logout' : 'Login'}
-          </button>
+          {loggedIn ? (
+            <>
+              <Link
+                href="/account/dashboard"
+                className="px-5 py-2 text-sm font-semibold transition-all"
+                style={{ border: '1px solid var(--color-charcoal-mid)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', background: 'transparent' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-charcoal)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                My Corner
+              </Link>
+              <button
+                onClick={handleAuthClick}
+                className="text-sm transition-colors"
+                style={{ color: 'var(--color-smoke)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-cream-dark)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-smoke)')}
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAuthClick}
+              className="px-5 py-2 text-sm font-semibold transition-all"
+              style={{ background: 'var(--color-terracotta)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-terracotta-light)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-terracotta)')}
+            >
+              Login
+            </button>
+          )}
         </nav>
 
         {/* Mobile hamburger */}
@@ -171,13 +180,33 @@ export default function Navbar() {
           >
             Shop Now
           </Link>
-          <button
-            onClick={() => { setMenuOpen(false); handleAuthClick(); }}
-            className="text-center py-3 text-sm font-semibold"
-            style={authButtonStyle}
-          >
-            {loggedIn ? 'Logout' : 'Login'}
-          </button>
+          {loggedIn ? (
+            <>
+              <Link
+                href="/account/dashboard"
+                className="text-center py-3 text-sm font-semibold"
+                style={{ border: '1px solid var(--color-charcoal-mid)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'block' }}
+                onClick={() => setMenuOpen(false)}
+              >
+                My Corner
+              </Link>
+              <button
+                onClick={() => { setMenuOpen(false); handleAuthClick(); }}
+                className="text-center py-2 text-sm"
+                style={{ color: 'var(--color-smoke)', letterSpacing: '0.08em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => { setMenuOpen(false); handleAuthClick(); }}
+              className="text-center py-3 text-sm font-semibold"
+              style={{ background: 'var(--color-terracotta)', color: 'var(--color-cream)', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Login
+            </button>
+          )}
         </div>
       )}
     </header>
