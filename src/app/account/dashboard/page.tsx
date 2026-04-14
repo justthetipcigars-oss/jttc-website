@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('preferred_name, full_name')
     .eq('id', user.id)
     .single();
 
@@ -28,7 +28,13 @@ export default async function DashboardPage() {
               Aficionado&apos;s Corner
             </div>
             <h1 className="display" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, color: 'var(--color-cream)', lineHeight: 1.1 }}>
-              Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
+              Welcome back{
+                profile?.preferred_name
+                  ? `, ${profile.preferred_name}`
+                  : profile?.full_name
+                  ? `, ${profile.full_name.split(' ')[0]}`
+                  : ''
+              }.
             </h1>
           </div>
 

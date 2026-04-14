@@ -9,11 +9,12 @@ type Card = {
 };
 
 const cards: Card[] = [
-  { label: 'Purchase History', desc: 'In-store and online orders', href: '/account/history', img: '/images/icon-history.png' },
-  { label: 'Wishlist', desc: 'Saved cigars and notifications', href: '/account/wishlist', img: '/images/icon-wishlist.png' },
-  { label: 'My Humidor', desc: 'Cigars in your collection', href: '/account/humidor', img: '/images/icon-humidor.png' },
-  { label: 'My Ashtray', desc: 'Cigars you have smoked', href: '/account/ashtray', img: '/images/icon-ashtray.png' },
-  { label: 'Tasting Journal', desc: 'Your notes and ratings', href: '/account/journal', img: '/images/icon-journal.png' },
+  { label: 'My Profile',       desc: 'Your info, preferences & social', href: '/account/profile',  img: '/images/icon-profile.png' },
+  { label: 'Purchase History', desc: 'In-store and online orders',       href: '/account/history',  img: '/images/icon-history.png' },
+  { label: 'Wishlist',         desc: 'Saved cigars and notifications',   href: '/account/wishlist', img: '/images/icon-wishlist.png' },
+  { label: 'My Humidor',       desc: 'Cigars in your collection',        href: '/account/humidor',  img: '/images/icon-humidor.png' },
+  { label: 'My Ashtray',       desc: 'Cigars you have smoked',           href: '/account/ashtray',  img: '/images/icon-ashtray.png' },
+  { label: 'Tasting Journal',  desc: 'Your notes and ratings',           href: '/account/journal',  img: '/images/icon-journal.png' },
 ];
 
 export default function DashboardCards() {

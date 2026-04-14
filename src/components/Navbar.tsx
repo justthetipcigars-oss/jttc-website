@@ -15,11 +15,12 @@ const links = [
 
 const accountLinks = [
   { label: 'Go To My Corner',    href: '/account/dashboard' },
-  { label: 'Purchase History',   href: '/account/history' },
-  { label: 'Wishlist',           href: '/account/wishlist' },
-  { label: 'My Humidor',         href: '/account/humidor' },
-  { label: 'My Ashtray',         href: '/account/ashtray' },
-  { label: 'Tasting Journal',    href: '/account/journal' },
+  { label: 'My Profile',         href: '/account/profile'   },
+  { label: 'Purchase History',   href: '/account/history'   },
+  { label: 'Wishlist',           href: '/account/wishlist'  },
+  { label: 'My Humidor',         href: '/account/humidor'   },
+  { label: 'My Ashtray',         href: '/account/ashtray'   },
+  { label: 'Tasting Journal',    href: '/account/journal'   },
 ];
 
 export default function Navbar() {
