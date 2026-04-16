@@ -52,9 +52,10 @@ export default function HistoryClient() {
               We couldn&apos;t link your in-store account automatically.
             </p>
             <p style={{ color: 'var(--color-smoke)', fontSize: '0.9rem', lineHeight: 1.8 }}>
-              Make sure your <strong style={{ color: 'var(--color-cream-dark)' }}>phone number</strong> or <strong style={{ color: 'var(--color-cream-dark)' }}>email</strong> in{' '}
-              <a href="/account/profile" style={{ color: 'var(--color-terracotta)' }}>My Profile</a>{' '}
-              matches what&apos;s on file at the shop, then come back here.
+              If you signed in with Google, your Google email may differ from what&apos;s on file at the shop.
+              Go to <a href="/account/profile" style={{ color: 'var(--color-terracotta)' }}>My Profile</a> and
+              set your <strong style={{ color: 'var(--color-cream-dark)' }}>Preferred Email</strong> or <strong style={{ color: 'var(--color-cream-dark)' }}>phone number</strong> to
+              match what you use at Just The Tip, then come back here.
             </p>
           </>
         ) : (
