@@ -88,63 +88,7 @@ export default function Navbar() {
         overflow: 'visible',
       }}
     >
-      {/* ── Utility bar ── */}
-      <div
-        style={{
-          background: 'rgba(10,8,6,0.95)',
-          borderBottom: '1px solid rgba(196,98,45,0.15)',
-          height: '36px',
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
-          {/* Phone */}
-          <a
-            href="tel:+17249579229"
-            style={{
-              color: 'var(--color-smoke)',
-              fontSize: '0.72rem',
-              letterSpacing: '0.08em',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-cream)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-smoke)')}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.06 1.18 2 2 0 012.04.06h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            (724) 957-9229
-          </a>
-
-          {/* Review CTA — hidden on small mobile */}
-          <a
-            href={GOOGLE_REVIEW_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1"
-            style={{
-              color: 'var(--color-smoke)',
-              fontSize: '0.72rem',
-              letterSpacing: '0.08em',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-terracotta)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-smoke)')}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--color-terracotta)">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            Leave Us a Review
-          </a>
-        </div>
-      </div>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between" style={{ height: '80px' }}>
+<div className="max-w-7xl mx-auto px-6 flex items-center justify-between" style={{ height: '80px' }}>
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">

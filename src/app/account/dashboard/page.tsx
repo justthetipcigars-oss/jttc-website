@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
         <div className="max-w-5xl mx-auto px-6 py-16">
 
           {/* Header */}
