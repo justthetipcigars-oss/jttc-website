@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'The Lounge | Just The Tip Cigars',
-  description: 'A place to slow down, light up, and feel at home. The Just The Tip Cigars lounge — South Park Township, PA.',
+  description: "Welcome to the family. Just The Tip Cigars is South Park's no-pretense cigar lounge built for serious smokers and curious newcomers alike. Walk-ins always welcome — can't wait to smoke with y'all.",
 };
 
 export default function LoungePage() {

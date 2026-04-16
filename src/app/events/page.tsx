@@ -7,7 +7,7 @@ export const revalidate = 60;
 
 export const metadata = {
   title: 'Events | Just The Tip Cigars',
-  description: 'Upcoming events at Just The Tip Cigars — tastings, pairings, pop-ups and more.',
+  description: "From smoke nights at the lounge to weddings, private gatherings, and connoisseur events — Just The Tip Cigars has you covered. See what's on the calendar.",
 };
 
 export default async function EventsPage() {

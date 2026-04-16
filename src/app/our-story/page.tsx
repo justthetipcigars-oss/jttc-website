@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Our Story | Just The Tip Cigars',
-  description: 'The American Dream — how Just The Tip Cigars came to be.',
+  description: 'A veteran, a passion for cigars, and a gap in the community. Here\'s how Just The Tip Cigars went from an idea to South Park\'s favorite gathering place.',
 };
 
 export default function OurStoryPage() {

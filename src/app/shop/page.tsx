@@ -5,6 +5,11 @@ import ShopClient from '@/components/shop/ShopClient';
 
 export const revalidate = 3600;
 
+export const metadata = {
+  title: 'Shop | Just The Tip Cigars',
+  description: 'Boutique and hard-to-find cigars from the world\'s top brands. Just The Tip Cigars carries premium singles and boxes with live inventory updated in real time from our South Park, PA lounge.',
+};
+
 export default async function ShopPage() {
   let products: LightspeedProduct[] = [];
   let error = false;

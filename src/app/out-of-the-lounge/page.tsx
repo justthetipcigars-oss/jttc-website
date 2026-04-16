@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Out of the Lounge | Just The Tip Cigars',
-  description: 'Bring the Just The Tip Cigars experience to your next off-site event.',
+  description: "Take the Just The Tip Cigars experience off-site. We bring premium cigars, expert knowledge, and lounge-quality service to weddings, corporate events, private gatherings, and more. Let's make your event unforgettable.",
 };
 
 export default function OutOfTheLoungePage() {

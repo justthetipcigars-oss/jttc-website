@@ -7,6 +7,11 @@ import FeaturedProducts from '@/components/home/FeaturedProducts';
 import EventsPreview from '@/components/home/EventsPreview';
 import EmailSignup from '@/components/home/EmailSignup';
 
+export const metadata = {
+  title: 'Just The Tip Cigars | South Park, PA',
+  description: "Just The Tip Cigars is South Park's only veteran-owned cigar lounge. Founded by a lifelong enthusiast, built for the community. Come in, slow down, light up.",
+};
+
 export default function HomePage() {
   return (
     <>

@@ -4,7 +4,7 @@ import ContactForm from './ContactForm';
 
 export const metadata = {
   title: 'Contact | Just The Tip Cigars',
-  description: 'Get in touch with Just The Tip Cigars — South Park Township, PA. Questions, private events, or just want to say hello.',
+  description: 'Get in touch with Just The Tip Cigars. Find us at 2550 Brownsville Rd, South Park Township, PA — or reach out directly. We\'d love to hear from you.',
 };
 
 const hours = [
