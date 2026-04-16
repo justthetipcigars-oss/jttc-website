@@ -8,6 +8,18 @@ export const revalidate = 3600;
 export const metadata = {
   title: 'Shop | Just The Tip Cigars',
   description: 'Boutique and hard-to-find cigars from the world\'s top brands. Just The Tip Cigars carries premium singles and boxes with live inventory updated in real time from our South Park, PA lounge.',
+  openGraph: {
+    title: 'Shop | Just The Tip Cigars',
+    description: 'Boutique and hard-to-find cigars from the world\'s top brands. Live inventory from our South Park, PA lounge.',
+    url: 'https://www.justthetipcigars.com/shop',
+    images: [{ url: '/images/icon-humidor.png', width: 1200, height: 630, alt: 'Just The Tip Cigars Humidor' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Shop | Just The Tip Cigars',
+    description: 'Boutique and hard-to-find cigars from the world\'s top brands. Live inventory from our South Park, PA lounge.',
+    images: ['/images/icon-humidor.png'],
+  },
 };
 
 export default async function ShopPage() {

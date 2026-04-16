@@ -5,6 +5,18 @@ import ContactForm from './ContactForm';
 export const metadata = {
   title: 'Contact | Just The Tip Cigars',
   description: 'Get in touch with Just The Tip Cigars. Find us at 2550 Brownsville Rd, South Park Township, PA — or reach out directly. We\'d love to hear from you.',
+  openGraph: {
+    title: 'Contact | Just The Tip Cigars',
+    description: 'Find us at 2550 Brownsville Rd, South Park Township, PA — or reach out directly.',
+    url: 'https://www.justthetipcigars.com/contact',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Contact | Just The Tip Cigars',
+    description: '2550 Brownsville Rd, South Park Township, PA. We\'d love to hear from you.',
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 const hours = [

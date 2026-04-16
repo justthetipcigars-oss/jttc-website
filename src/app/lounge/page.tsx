@@ -4,6 +4,18 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'The Lounge | Just The Tip Cigars',
   description: "Welcome to the family. Just The Tip Cigars is South Park's no-pretense cigar lounge built for serious smokers and curious newcomers alike. Walk-ins always welcome — can't wait to smoke with y'all.",
+  openGraph: {
+    title: 'The Lounge | Just The Tip Cigars',
+    description: "South Park's no-pretense cigar lounge. Serious smokers, curious newcomers — all welcome. Can't wait to smoke with y'all.",
+    url: 'https://www.justthetipcigars.com/lounge',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars Lounge' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'The Lounge | Just The Tip Cigars',
+    description: "South Park's no-pretense cigar lounge. Walk-ins always welcome.",
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 export default function LoungePage() {

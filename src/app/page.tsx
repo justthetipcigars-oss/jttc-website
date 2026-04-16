@@ -10,6 +10,18 @@ import EmailSignup from '@/components/home/EmailSignup';
 export const metadata = {
   title: 'Just The Tip Cigars | South Park, PA',
   description: "Just The Tip Cigars is South Park's only veteran-owned cigar lounge. Founded by a lifelong enthusiast, built for the community. Come in, slow down, light up.",
+  openGraph: {
+    title: 'Just The Tip Cigars | South Park, PA',
+    description: "South Park's only veteran-owned cigar lounge. Come in, slow down, light up.",
+    url: 'https://www.justthetipcigars.com',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Just The Tip Cigars | South Park, PA',
+    description: "South Park's only veteran-owned cigar lounge. Come in, slow down, light up.",
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 const localBusinessSchema = {

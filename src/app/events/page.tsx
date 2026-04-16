@@ -8,6 +8,18 @@ export const revalidate = 60;
 export const metadata = {
   title: 'Events | Just The Tip Cigars',
   description: "From smoke nights at the lounge to weddings, private gatherings, and connoisseur events — Just The Tip Cigars has you covered. See what's on the calendar.",
+  openGraph: {
+    title: 'Events | Just The Tip Cigars',
+    description: "Smoke nights, private gatherings, connoisseur events. See what's on the calendar at Just The Tip Cigars.",
+    url: 'https://www.justthetipcigars.com/events',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Events | Just The Tip Cigars',
+    description: "Smoke nights, private gatherings, connoisseur events. See what's on the calendar.",
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 export default async function EventsPage() {

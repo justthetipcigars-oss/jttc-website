@@ -4,6 +4,18 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Out of the Lounge | Just The Tip Cigars',
   description: "Take the Just The Tip Cigars experience off-site. We bring premium cigars, expert knowledge, and lounge-quality service to weddings, corporate events, private gatherings, and more. Let's make your event unforgettable.",
+  openGraph: {
+    title: 'Out of the Lounge | Just The Tip Cigars',
+    description: "We bring the cigars, the knowledge, and the vibe to your event. Weddings, corporate events, private gatherings.",
+    url: 'https://www.justthetipcigars.com/out-of-the-lounge',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars Off-Site Events' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Out of the Lounge | Just The Tip Cigars',
+    description: 'We bring the cigars, the knowledge, and the vibe to your event.',
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 export default function OutOfTheLoungePage() {

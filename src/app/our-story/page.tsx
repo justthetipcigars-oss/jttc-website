@@ -4,6 +4,18 @@ import Footer from '@/components/Footer';
 export const metadata = {
   title: 'Our Story | Just The Tip Cigars',
   description: 'A veteran, a passion for cigars, and a gap in the community. Here\'s how Just The Tip Cigars went from an idea to South Park\'s favorite gathering place.',
+  openGraph: {
+    title: 'Our Story | Just The Tip Cigars',
+    description: 'A veteran, a passion for cigars, and a gap in the community. The story behind South Park\'s favorite gathering place.',
+    url: 'https://www.justthetipcigars.com/our-story',
+    images: [{ url: '/images/cowboy-wb.png', width: 1200, height: 630, alt: 'Just The Tip Cigars' }],
+  },
+  twitter: {
+    card: 'summary_large_image' as const,
+    title: 'Our Story | Just The Tip Cigars',
+    description: 'A veteran, a passion for cigars, and a gap in the community.',
+    images: ['/images/cowboy-wb.png'],
+  },
 };
 
 export default function OurStoryPage() {
