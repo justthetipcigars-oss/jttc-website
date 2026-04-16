@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { saveProfile } from './actions';
 
 type Profile = {
@@ -20,6 +20,7 @@ type Profile = {
   opt_in_events_text:  boolean;
   opt_in_newsletter:   boolean;
   member_since:        string | null;
+  avatar_url:          string | null;
 };
 
 const JTTC_IG = 'https://www.instagram.com/justthetipcigars';
@@ -55,9 +56,13 @@ const sectionHead: React.CSSProperties = {
 };
 
 export default function ProfileClient({ profile, userEmail }: { profile: Profile; userEmail: string }) {
-  const [saved, setSaved]       = useState(false);
-  const [errMsg, setErrMsg]     = useState('');
+  const [saved, setSaved]           = useState(false);
+  const [errMsg, setErrMsg]         = useState('');
   const [isPending, startTransition] = useTransition();
+  const [avatarSrc, setAvatarSrc]   = useState<string>(profile.avatar_url ?? '/your pic icon.jpg');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarErr, setAvatarErr]   = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,12 +76,103 @@ export default function ProfileClient({ profile, userEmail }: { profile: Profile
     });
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarSrc(URL.createObjectURL(file));
+    setAvatarErr('');
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('avatar', file);
+      const res = await fetch('/api/account/upload-avatar', { method: 'POST', body: fd });
+      const result = await res.json();
+      if (result?.error) {
+        setAvatarErr(result.error);
+      } else if (result?.avatarUrl) {
+        setAvatarSrc(result.avatarUrl);
+      }
+    } catch (err: unknown) {
+      setAvatarErr(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
   const memberDate = profile.member_since
     ? new Date(profile.member_since).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : null;
 
   return (
     <form onSubmit={handleSubmit}>
+
+      {/* ── Profile Picture ───────────────────────────────────── */}
+      <div style={{ marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        {/* Circle avatar */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <div
+            style={{
+              width: 100, height: 100,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '2px solid var(--color-charcoal-mid)',
+              background: 'var(--color-charcoal)',
+            }}
+          >
+            <img
+              src={avatarSrc}
+              alt="Profile"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={() => setAvatarSrc('/your pic icon.jpg')}
+            />
+          </div>
+          {avatarUploading && (
+            <div style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              background: 'rgba(14,12,10,0.6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <div style={{ width: 20, height: 20, border: '2px solid var(--color-terracotta)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            </div>
+          )}
+        </div>
+
+        {/* Upload controls */}
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleAvatarChange}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              padding: '0.55rem 1.25rem',
+              background: 'transparent',
+              border: '1px solid var(--color-charcoal-mid)',
+              color: 'var(--color-cream)',
+              fontSize: '0.75rem',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              display: 'block',
+              marginBottom: '0.5rem',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-terracotta)')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)')}
+          >
+            {profile.avatar_url ? 'Change Photo' : 'Upload Photo'}
+          </button>
+          <p style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', margin: 0, lineHeight: 1.5 }}>
+            Shown on your dashboard. JPG, PNG, or GIF.
+          </p>
+          {avatarErr && <p style={{ color: '#e74c3c', fontSize: '0.75rem', marginTop: '0.35rem' }}>{avatarErr}</p>}
+        </div>
+      </div>
 
       {/* ── Personal Info ─────────────────────────────────────── */}
       <div style={{ marginBottom: '3rem' }}>

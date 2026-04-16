@@ -7,7 +7,9 @@ const BASE_URL = process.env.LIGHTSPEED_BASE_URL!;
 const TOKEN    = process.env.LIGHTSPEED_API_TOKEN!;
 const LIFETIME = '2023-07-01T05:00:00Z';
 const CUSTOMER_INDEX_KEY = 'ls:customer_index';
-const CUSTOMER_INDEX_TTL = 60 * 60 * 6; // 6 hours
+const CUSTOMER_INDEX_TTL = 60 * 60 * 24; // 24 hours
+const USER_HISTORY_TTL   = 60 * 30;       // 30 minutes per-user cache
+const userHistoryKey     = (id: string) => `ls:history:${id}`;
 
 function normalizePhone(p: string | null | undefined) {
   return (p ?? '').replace(/\D/g, '').slice(-10);
@@ -75,15 +77,19 @@ export async function GET() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('lightspeed_customer_id, phone, preferred_email, email')
+      .select('lightspeed_customer_id, phone')
       .eq('id', user.id)
       .single();
+
+    // Return cached history if available
+    const cachedHistory = await redis.get(userHistoryKey(user.id));
+    if (cachedHistory) return NextResponse.json(cachedHistory);
 
     let customerId: string | null = profile?.lightspeed_customer_id ?? null;
 
     if (!customerId) {
       const phone = profile?.phone ?? null;
-      const email = profile?.preferred_email ?? profile?.email ?? user.email ?? null;
+      const email = user.email ?? null;
       if (phone || email) {
         customerId = await findAndSaveCustomerId(user.id, phone, email);
       }
@@ -170,7 +176,9 @@ export async function GET() {
         }) ?? [],
       }));
 
-    return NextResponse.json({ cigars, pipes, other, visits, visitCount: salesList.length });
+    const result = { cigars, pipes, other, visits, visitCount: salesList.length };
+    await redis.set(userHistoryKey(user.id), result, { ex: USER_HISTORY_TTL });
+    return NextResponse.json(result);
   } catch (err: unknown) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed' }, { status: 500 });
   }

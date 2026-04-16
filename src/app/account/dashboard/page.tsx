@@ -12,14 +12,14 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('preferred_name, full_name')
+    .select('preferred_name, full_name, avatar_url')
     .eq('id', user.id)
     .single();
 
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
         <div className="max-w-5xl mx-auto px-6 py-16">
 
           {/* Header */}
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Nav cards */}
-          <DashboardCards />
+          <DashboardCards avatarUrl={profile?.avatar_url ?? null} />
 
         </div>
       </main>

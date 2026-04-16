@@ -13,11 +13,11 @@ export async function GET() {
       .eq('user_id', user.id)
       .order('overall_rating', { ascending: false });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: 'Failed to load journal' }, { status: 500 });
 
     return NextResponse.json({ entries: data ?? [] });
-  } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed' }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
 
@@ -28,16 +28,28 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const body = await req.json();
+    const {
+      product_id, cigar_name, brand, size, wrapper, binder, filler,
+      date_smoked, body: bodyVal, flavor_intensity, strength, flavor_tags,
+      notes, appearance_rating, value_rating, flavor_rating, overall_rating,
+      band_photo_url, would_try_again,
+    } = body;
     const { data, error } = await supabase
       .from('cigar_journal')
-      .insert({ ...body, user_id: user.id })
+      .insert({
+        user_id: user.id,
+        product_id, cigar_name, brand, size, wrapper, binder, filler,
+        date_smoked, body: bodyVal, flavor_intensity, strength, flavor_tags,
+        notes, appearance_rating, value_rating, flavor_rating, overall_rating,
+        band_photo_url, would_try_again,
+      })
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: 'Failed to save journal entry' }, { status: 500 });
     return NextResponse.json(data);
-  } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed' }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
 
@@ -47,7 +59,20 @@ export async function PATCH(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const { id, ...fields } = await req.json();
+    const raw = await req.json();
+    const { id } = raw;
+    const {
+      product_id, cigar_name, brand, size, wrapper, binder, filler,
+      date_smoked, body: bodyVal, flavor_intensity, strength, flavor_tags,
+      notes, appearance_rating, value_rating, flavor_rating, overall_rating,
+      band_photo_url, would_try_again,
+    } = raw;
+    const fields = {
+      product_id, cigar_name, brand, size, wrapper, binder, filler,
+      date_smoked, body: bodyVal, flavor_intensity, strength, flavor_tags,
+      notes, appearance_rating, value_rating, flavor_rating, overall_rating,
+      band_photo_url, would_try_again,
+    };
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
     // Fetch current entry to snapshot
@@ -87,9 +112,9 @@ export async function PATCH(req: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: 'Failed to update journal entry' }, { status: 500 });
     return NextResponse.json(updated);
-  } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed' }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

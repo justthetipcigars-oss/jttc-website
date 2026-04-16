@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'secure.vendhq.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'rtgpctewzureirrsucde.supabase.co',
+      },
     ],
   },
 };

@@ -70,7 +70,7 @@ export default function AboutStrip() {
 
           <div className="flex items-center gap-4">
             <Link
-              href="/story"
+              href="/our-story"
               className="text-sm font-semibold tracking-widest uppercase transition-colors"
               style={{ color: 'var(--color-terracotta)', letterSpacing: '0.15em' }}
             >

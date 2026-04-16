@@ -1,7 +1,7 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
+
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CQ2VJvYGMQFfEAI/review';
 
 export default function Footer() {
   return (
@@ -70,12 +70,12 @@ export default function Footer() {
           </h4>
           <nav className="flex flex-col gap-2">
             {[
-              { label: 'The Lounge', href: '/lounge' },
-              { label: 'Shop', href: '/shop' },
-              { label: 'Events', href: '/events' },
-              { label: 'Our Story', href: '/story' },
-              { label: 'Contact', href: '/contact' },
-              { label: 'Military Discount', href: '/military-discount' },
+              { label: 'The Lounge',  href: '/lounge' },
+              { label: 'Shop',        href: '/shop' },
+              { label: 'Our Brands',  href: '/brands' },
+              { label: 'Events',      href: '/events' },
+              { label: 'Our Story',   href: '/our-story' },
+              { label: 'Contact',     href: '/contact' },
             ].map(l => (
               <Link
                 key={l.href}
@@ -88,6 +88,17 @@ export default function Footer() {
                 {l.label}
               </Link>
             ))}
+            <a
+              href={GOOGLE_REVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm transition-colors w-fit flex items-center gap-1 mt-1"
+              style={{ color: 'var(--color-terracotta)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-cream)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-terracotta)')}
+            >
+              ★ Leave Us a Review
+            </a>
           </nav>
         </div>
       </div>

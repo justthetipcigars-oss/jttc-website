@@ -34,12 +34,13 @@ export default async function ProfilePage() {
     opt_in_events_text:  profile?.opt_in_events_text  ?? false,
     opt_in_newsletter:   profile?.opt_in_newsletter   ?? false,
     member_since:        profile?.member_since        ?? user.created_at,
+    avatar_url:          profile?.avatar_url          ?? null,
   };
 
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
         <div className="max-w-3xl mx-auto px-6 py-16">
 
           {/* Back link */}

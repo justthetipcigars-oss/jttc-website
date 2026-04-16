@@ -22,7 +22,7 @@ export default function LoungePage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
 
         {/* Hero */}
         <div

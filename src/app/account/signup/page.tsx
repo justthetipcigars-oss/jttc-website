@@ -44,7 +44,7 @@ export default function SignupPage() {
     return (
       <>
         <Navbar />
-        <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+        <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
           <div className="max-w-md mx-auto px-6 py-20 text-center">
             <div style={{ background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '3rem 2rem' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✉️</div>
@@ -65,7 +65,7 @@ export default function SignupPage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
         <div className="max-w-md mx-auto px-6 py-20">
 
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>

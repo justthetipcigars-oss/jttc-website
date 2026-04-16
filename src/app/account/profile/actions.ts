@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
 export async function saveProfile(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +23,6 @@ export async function saveProfile(formData: FormData) {
     opt_in_events_email: formData.get('opt_in_events_email') === 'on',
     opt_in_events_text:  formData.get('opt_in_events_text')  === 'on',
     opt_in_newsletter:   formData.get('opt_in_newsletter')   === 'on',
-    updated_at:          new Date().toISOString(),
   };
 
   const { error } = await supabase

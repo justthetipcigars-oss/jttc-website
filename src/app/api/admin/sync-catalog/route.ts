@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { redis } from '@/lib/redis';
 
 const CACHE_KEY = 'catalog:search_index';
@@ -11,6 +13,15 @@ type CatalogEntry = {
   size: string;
   image_url: string | null;
 };
+
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!);
+  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
+  return profile?.is_admin ? user : null;
+}
 
 async function buildSearchIndex(): Promise<CatalogEntry[]> {
   const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
@@ -51,11 +62,9 @@ async function buildSearchIndex(): Promise<CatalogEntry[]> {
   return entries;
 }
 
-export async function POST(req: NextRequest) {
-  const auth = req.headers.get('x-admin-password');
-  if (auth !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function POST() {
+  const user = await requireAdmin();
+  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const catalog = await buildSearchIndex();
   await redis.set(CACHE_KEY, catalog, { ex: CACHE_TTL });

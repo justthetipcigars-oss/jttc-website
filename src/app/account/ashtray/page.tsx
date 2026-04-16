@@ -22,7 +22,7 @@ export default async function AshtrayPage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
         <div className="max-w-5xl mx-auto px-6 py-16">
 
           <div style={{ marginBottom: '2.5rem' }}>

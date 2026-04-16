@@ -22,9 +22,10 @@ export const metadata = {
   },
 };
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ brand?: string }> }) {
   let products: LightspeedProduct[] = [];
   let error = false;
+  const { brand: initialBrand = '' } = await searchParams;
 
   try {
     products = await fetchAllProducts();
@@ -35,7 +36,7 @@ export default async function ShopPage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
 
         {/* Header */}
         <div style={{ background: 'var(--color-charcoal)', borderBottom: '1px solid var(--color-charcoal-mid)' }}>
@@ -47,7 +48,7 @@ export default async function ShopPage() {
               className="display"
               style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, color: 'var(--color-cream)', lineHeight: 1.1 }}
             >
-              Shop the Full Selection
+              {initialBrand ? initialBrand : 'Shop the Full Selection'}
             </h1>
           </div>
         </div>
@@ -57,7 +58,7 @@ export default async function ShopPage() {
             <p style={{ color: 'var(--color-smoke)' }}>Unable to load products right now. Please try again shortly.</p>
           </div>
         ) : (
-          <ShopClient products={products} />
+          <ShopClient products={products} initialBrand={initialBrand} />
         )}
       </main>
       <Footer />

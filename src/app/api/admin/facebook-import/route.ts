@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 
-function isAuthorized(req: NextRequest) {
-  return req.headers.get('x-admin-password') === process.env.ADMIN_PASSWORD;
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!);
+  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
+  return profile?.is_admin ? user : null;
 }
 
 function getMeta(html: string, property: string): string {
@@ -17,12 +24,14 @@ function getMeta(html: string, property: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const user = await requireAdmin();
+  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { url } = await req.json();
-  if (!url || !url.includes('facebook.com')) {
+  let parsedUrl: URL;
+  try { parsedUrl = new URL(url); } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); }
+  const allowed = ['facebook.com', 'www.facebook.com', 'm.facebook.com', 'fb.com'];
+  if (!allowed.includes(parsedUrl.hostname) || parsedUrl.protocol !== 'https:') {
     return NextResponse.json({ error: 'Invalid Facebook URL' }, { status: 400 });
   }
 
@@ -35,19 +44,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!res.ok) {
-      return NextResponse.json({ error: `Facebook returned ${res.status}` }, { status: 502 });
-    }
+    if (!res.ok) return NextResponse.json({ error: `Facebook returned ${res.status}` }, { status: 502 });
 
     const html = await res.text();
-
-    const title = getMeta(html, 'og:title');
+    const title       = getMeta(html, 'og:title');
     const description = getMeta(html, 'og:description');
-    const imageUrl = getMeta(html, 'og:image');
+    const imageUrl    = getMeta(html, 'og:image');
 
-    if (!title) {
-      return NextResponse.json({ error: 'Could not read event data. Make sure the event is public.' }, { status: 422 });
-    }
+    if (!title) return NextResponse.json({ error: 'Could not read event data. Make sure the event is public.' }, { status: 422 });
 
     return NextResponse.json({ title, description, imageUrl, facebookEventUrl: url });
   } catch {

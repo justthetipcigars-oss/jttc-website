@@ -39,7 +39,7 @@ export default function LoginPage() {
   return (
     <>
       <Navbar />
-      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
+      <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '116px' }}>
         <div className="max-w-md mx-auto px-6 py-20">
 
           {/* Header */}

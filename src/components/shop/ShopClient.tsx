@@ -13,11 +13,11 @@ type ShowQty = 'singles' | 'boxes' | 'both';
 
 const SWAG_CATEGORY = 'JTTC Swag';
 
-export default function ShopClient({ products }: { products: LightspeedProduct[] }) {
+export default function ShopClient({ products, initialBrand = '' }: { products: LightspeedProduct[]; initialBrand?: string }) {
   const [tab, setTab] = useState<Tab>('cigars');
   const [showQty, setShowQty] = useState<ShowQty>('both');
   const [search, setSearch] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
 
   function openQuickView(group: ProductGroup) {

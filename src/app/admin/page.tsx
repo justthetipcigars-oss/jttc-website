@@ -1,7 +1,5 @@
-import AdminClient from '@/components/admin/AdminClient';
-
-export const metadata = { title: 'Admin | JTTC' };
+import { redirect } from 'next/navigation';
 
 export default function AdminPage() {
-  return <AdminClient />;
+  redirect('/admin/events');
 }
