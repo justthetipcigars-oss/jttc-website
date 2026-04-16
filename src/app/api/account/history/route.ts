@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { redis } from '@/lib/redis';
 
 const BASE_URL = process.env.LIGHTSPEED_BASE_URL!;
 const TOKEN    = process.env.LIGHTSPEED_API_TOKEN!;
 const LIFETIME = '2023-07-01T05:00:00Z';
+const CUSTOMER_INDEX_KEY = 'ls:customer_index';
+const CUSTOMER_INDEX_TTL = 60 * 60 * 6; // 6 hours
 
 function normalizePhone(p: string | null | undefined) {
   return (p ?? '').replace(/\D/g, '').slice(-10);
@@ -17,50 +20,46 @@ function parseCategoryMacro(p: Record<string, unknown>): string {
   return raw.trim().toLowerCase();
 }
 
-async function fetchCustomerPage(after: string | null): Promise<{ customers: Record<string, unknown>[]; nextAfter: string | null }> {
-  let url = `${BASE_URL}/customers?page_size=250`;
-  if (after) url += `&after=${after}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` }, cache: 'no-store' });
-  if (!res.ok) return { customers: [], nextAfter: null };
-  const data = await res.json();
-  const customers = data.data ?? [];
-  const nextAfter = customers.length === 250 ? (data.version?.max ?? null) : null;
-  return { customers, nextAfter };
-}
+// Build and cache a lookup map: email/phone -> lightspeed customer id
+async function getCustomerIndex(): Promise<Record<string, string>> {
+  const cached = await redis.get<Record<string, string>>(CUSTOMER_INDEX_KEY);
+  if (cached) return cached;
 
-function matchesCustomer(c: Record<string, unknown>, phoneNorm: string, emailLower: string): boolean {
-  if (phoneNorm.length === 10) {
-    if (normalizePhone(c.phone as string) === phoneNorm) return true;
-    if (normalizePhone(c.mobile as string) === phoneNorm) return true;
-  }
-  if (emailLower && (c.email as string)?.trim().toLowerCase() === emailLower) return true;
-  return false;
+  const index: Record<string, string> = {};
+  let after: string | null = null;
+
+  do {
+    let url = `${BASE_URL}/customers?page_size=250`;
+    if (after) url += `&after=${after}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` }, cache: 'no-store' });
+    if (!res.ok) break;
+    const data = await res.json();
+    const page: Record<string, unknown>[] = data.data ?? [];
+
+    for (const c of page) {
+      const id = c.id as string;
+      if (c.email) index[(c.email as string).trim().toLowerCase()] = id;
+      const phone = normalizePhone(c.phone as string);
+      if (phone.length === 10) index[phone] = id;
+      const mobile = normalizePhone(c.mobile as string);
+      if (mobile.length === 10) index[mobile] = id;
+    }
+
+    after = page.length === 250 ? (data.version?.max ?? null) : null;
+  } while (after);
+
+  await redis.set(CUSTOMER_INDEX_KEY, index, { ex: CUSTOMER_INDEX_TTL });
+  return index;
 }
 
 async function findAndSaveCustomerId(userId: string, phone: string | null, email: string | null): Promise<string | null> {
-  const phoneNorm  = normalizePhone(phone);
-  const emailLower = email?.trim().toLowerCase() ?? '';
+  const index     = await getCustomerIndex();
+  const emailKey  = email?.trim().toLowerCase() ?? '';
+  const phoneKey  = normalizePhone(phone);
 
-  // Fetch first page, then batch-parallel the rest
-  const first = await fetchCustomerPage(null);
-  const match = first.customers.find(c => matchesCustomer(c, phoneNorm, emailLower));
-  if (match) { await saveCustomerId(userId, match.id as string); return match.id as string; }
-
-  if (!first.nextAfter) return null;
-
-  // Collect all remaining cursors by walking pages in parallel batches of 4
-  let cursors: string[] = [first.nextAfter];
-  while (cursors.length > 0) {
-    const batch = cursors.splice(0, 4);
-    const pages = await Promise.all(batch.map(c => fetchCustomerPage(c)));
-    for (const page of pages) {
-      const found = page.customers.find(c => matchesCustomer(c, phoneNorm, emailLower));
-      if (found) { await saveCustomerId(userId, found.id as string); return found.id as string; }
-      if (page.nextAfter) cursors.push(page.nextAfter);
-    }
-  }
-
-  return null;
+  const customerId = (emailKey && index[emailKey]) || (phoneKey.length === 10 && index[phoneKey]) || null;
+  if (customerId) await saveCustomerId(userId, customerId);
+  return customerId;
 }
 
 async function saveCustomerId(userId: string, customerId: string) {
