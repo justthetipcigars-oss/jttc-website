@@ -17,38 +17,55 @@ function parseCategoryMacro(p: Record<string, unknown>): string {
   return raw.trim().toLowerCase();
 }
 
+async function fetchCustomerPage(after: string | null): Promise<{ customers: Record<string, unknown>[]; nextAfter: string | null }> {
+  let url = `${BASE_URL}/customers?page_size=250`;
+  if (after) url += `&after=${after}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` }, cache: 'no-store' });
+  if (!res.ok) return { customers: [], nextAfter: null };
+  const data = await res.json();
+  const customers = data.data ?? [];
+  const nextAfter = customers.length === 250 ? (data.version?.max ?? null) : null;
+  return { customers, nextAfter };
+}
+
+function matchesCustomer(c: Record<string, unknown>, phoneNorm: string, emailLower: string): boolean {
+  if (phoneNorm.length === 10) {
+    if (normalizePhone(c.phone as string) === phoneNorm) return true;
+    if (normalizePhone(c.mobile as string) === phoneNorm) return true;
+  }
+  if (emailLower && (c.email as string)?.trim().toLowerCase() === emailLower) return true;
+  return false;
+}
+
 async function findAndSaveCustomerId(userId: string, phone: string | null, email: string | null): Promise<string | null> {
   const phoneNorm  = normalizePhone(phone);
   const emailLower = email?.trim().toLowerCase() ?? '';
-  let after: string | null = null;
 
-  do {
-    let url = `${BASE_URL}/customers?page_size=250`;
-    if (after) url += `&after=${after}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` }, cache: 'no-store' });
-    if (!res.ok) break;
-    const data = await res.json();
-    const page = data.data ?? [];
+  // Fetch first page, then batch-parallel the rest
+  const first = await fetchCustomerPage(null);
+  const match = first.customers.find(c => matchesCustomer(c, phoneNorm, emailLower));
+  if (match) { await saveCustomerId(userId, match.id as string); return match.id as string; }
 
-    for (const c of page) {
-      if (phoneNorm.length === 10 && (normalizePhone(c.phone) === phoneNorm || normalizePhone(c.mobile) === phoneNorm)) {
-        await saveCustomerId(userId, c.id);
-        return c.id;
-      }
-      if (emailLower && c.email?.trim().toLowerCase() === emailLower) {
-        await saveCustomerId(userId, c.id);
-        return c.id;
-      }
+  if (!first.nextAfter) return null;
+
+  // Collect all remaining cursors by walking pages in parallel batches of 4
+  let cursors: string[] = [first.nextAfter];
+  while (cursors.length > 0) {
+    const batch = cursors.splice(0, 4);
+    const pages = await Promise.all(batch.map(c => fetchCustomerPage(c)));
+    for (const page of pages) {
+      const found = page.customers.find(c => matchesCustomer(c, phoneNorm, emailLower));
+      if (found) { await saveCustomerId(userId, found.id as string); return found.id as string; }
+      if (page.nextAfter) cursors.push(page.nextAfter);
     }
-    after = page.length === 250 ? (data.version?.max ?? null) : null;
-  } while (after);
+  }
 
   return null;
 }
 
 async function saveCustomerId(userId: string, customerId: string) {
   const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!);
-  await admin.from('profiles').update({ lightspeed_customer_id: customerId }).eq('id', userId);
+  await admin.from('profiles').upsert({ id: userId, lightspeed_customer_id: customerId });
 }
 
 export async function GET() {
@@ -59,7 +76,7 @@ export async function GET() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('lightspeed_customer_id, phone, preferred_email')
+      .select('lightspeed_customer_id, phone, preferred_email, email')
       .eq('id', user.id)
       .single();
 
@@ -67,7 +84,7 @@ export async function GET() {
 
     if (!customerId) {
       const phone = profile?.phone ?? null;
-      const email = profile?.preferred_email ?? user.email ?? null;
+      const email = profile?.preferred_email ?? profile?.email ?? user.email ?? null;
       if (phone || email) {
         customerId = await findAndSaveCustomerId(user.id, phone, email);
       }
