@@ -1,5 +1,9 @@
+import { redis } from './redis';
+
 const BASE_URL = process.env.LIGHTSPEED_BASE_URL || 'https://justthetipcigars.retail.lightspeed.app/api/2.0';
 const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
+const CACHE_KEY = 'ls:all_products';
+const CACHE_TTL = 3600;
 
 const SWAG_TYPES = new Set([
   'Short Sleeve Tee', 'Hats', 'Beanie', 'Hoodie', 'Trucker',
@@ -109,7 +113,7 @@ async function fetchInventoryMap(headers: Record<string, string>): Promise<Map<s
   return map;
 }
 
-export async function fetchAllProducts(): Promise<LightspeedProduct[]> {
+async function fetchAllProductsFromAPI(): Promise<LightspeedProduct[]> {
   if (!TOKEN) throw new Error('LIGHTSPEED_API_TOKEN not set');
 
   const headers = {
@@ -165,6 +169,25 @@ export async function fetchAllProducts(): Promise<LightspeedProduct[]> {
   }
 
   return filtered;
+}
+
+export async function fetchAllProducts(): Promise<LightspeedProduct[]> {
+  try {
+    const cached = await redis.get<LightspeedProduct[]>(CACHE_KEY);
+    if (cached) return cached;
+  } catch {
+    // Redis unavailable — fall through to live fetch
+  }
+
+  const products = await fetchAllProductsFromAPI();
+
+  try {
+    await redis.set(CACHE_KEY, products, { ex: CACHE_TTL });
+  } catch {
+    // Cache write failure is non-fatal
+  }
+
+  return products;
 }
 
 export async function fetchCigars(): Promise<LightspeedProduct[]> {
