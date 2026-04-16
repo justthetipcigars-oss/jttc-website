@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { LightspeedProduct } from '@/lib/lightspeed';
 import { groupByName, ProductGroup } from '@/lib/productGroups';
 import CigarModal from '@/components/shop/CigarModal';
+import AshtrayModal, { AshtrayEntry } from '@/components/AshtrayModal';
 
 type HumidorItem = {
   id: string;
@@ -29,6 +30,7 @@ export default function HumidorClient({
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
   const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
+  const [pendingAshtray, setPendingAshtray] = useState<HumidorItem | null>(null);
 
   // Build cigar groups from the full catalog (no stock filter — you can own anything)
   const cigarGroups = useMemo(() => {
@@ -91,18 +93,7 @@ export default function HumidorClient({
     }
   }
 
-  async function moveToAshtray(item: HumidorItem) {
-    await fetch('/api/account/ashtray', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product_id: item.product_id,
-        product_name: item.product_name,
-        brand: item.brand,
-        size: item.size,
-        image_url: item.image_url,
-      }),
-    });
+  async function removeFromHumidor(item: HumidorItem) {
     await fetch('/api/account/humidor', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -239,7 +230,7 @@ export default function HumidorClient({
               </div>
 
               <button
-                onClick={() => moveToAshtray(item)}
+                onClick={() => setPendingAshtray(item)}
                 style={{
                   width: '100%',
                   padding: '0.6rem',
@@ -259,6 +250,24 @@ export default function HumidorClient({
             </div>
           ))}
         </div>
+      )}
+
+      {/* Ashtray modal */}
+      {pendingAshtray && (
+        <AshtrayModal
+          item={{
+            product_id: pendingAshtray.product_id,
+            product_name: pendingAshtray.product_name,
+            brand: pendingAshtray.brand,
+            size: pendingAshtray.size,
+            image_url: pendingAshtray.image_url,
+          }}
+          onDone={(_entry: AshtrayEntry) => {
+            removeFromHumidor(pendingAshtray);
+            setPendingAshtray(null);
+          }}
+          onClose={() => setPendingAshtray(null)}
+        />
       )}
 
       {/* Product detail modal */}

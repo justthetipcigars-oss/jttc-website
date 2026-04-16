@@ -21,11 +21,28 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
-  const { product_id, product_name, brand, size, image_url } = body;
+  const { product_id, product_name, brand, size, image_url, status = 'pending' } = body;
 
   const { data } = await supabase
     .from('ashtray')
-    .insert({ user_id: user.id, product_id, product_name, brand, size, image_url })
+    .insert({ user_id: user.id, product_id, product_name, brand, size, image_url, status })
+    .select()
+    .single();
+
+  return NextResponse.json(data);
+}
+
+export async function PATCH(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id, quick_rating, status } = await req.json();
+  const { data } = await supabase
+    .from('ashtray')
+    .update({ quick_rating, status })
+    .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
 
