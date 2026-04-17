@@ -28,7 +28,7 @@ export default async function BrandsPage() {
 
   try {
     const products = await fetchAllProducts();
-    const cigarProducts = products.filter(p => p.isCigar && p.brand && p.brand.trim());
+    const cigarProducts = products.filter(p => p.isCigar && p.brand && p.brand.trim() && p.stockAmount > 0);
 
     // Build brand map: name → { count, best image }
     const map = new Map<string, { count: number; imageUrl: string | null }>();
@@ -151,7 +151,7 @@ export default async function BrandsPage() {
                       {brand.name}
                     </div>
                     <div style={{ color: 'var(--color-smoke)', fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                      {brand.productCount} {brand.productCount === 1 ? 'product' : 'products'}
+                      {brand.productCount} in stock
                     </div>
 
                     {/* Arrow on hover */}
