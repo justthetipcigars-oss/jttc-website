@@ -36,6 +36,13 @@ const BRAND_LOGOS: Record<string, string> = {
   'Patina':                     '/images/brands/patina.png',
   'Rocky Patel':                '/images/brands/rocky-patel.png',
   'Zino':                       '/images/brands/zino.png',
+  'Aganorsa':                   '/images/brands/aganorsa.svg',
+  'Aladino':                    '/images/brands/aladino.png',
+  'Drew Estate':                '/images/brands/drew-estate.png',
+  'Kristoff':                   '/images/brands/kristoff.png',
+  'Perdomo':                    '/images/brands/perdomo.png',
+  'Romaraft':                   '/images/brands/romacraft.png',
+  'Tatascan':                   '/images/brands/tatascan.png',
 };
 
 type BrandSummary = {
