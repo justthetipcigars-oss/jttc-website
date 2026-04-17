@@ -146,13 +146,13 @@ export default async function BrandsPage() {
 
                     {/* Brand image if available */}
                     {brand.imageUrl ? (
-                      <div className="relative mb-3" style={{ width: 64, height: 64, flexShrink: 0 }}>
+                      <div className="relative mb-3" style={{ width: 128, height: 128, flexShrink: 0 }}>
                         <Image
                           src={brand.imageUrl}
                           alt={brand.name}
                           fill
                           className="object-contain"
-                          sizes="64px"
+                          sizes="128px"
                         />
                       </div>
                     ) : (
