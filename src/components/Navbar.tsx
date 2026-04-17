@@ -104,7 +104,7 @@ export default function Navbar() {
           </div>
           <div
             className="display"
-            style={{ color: 'var(--color-cream)', fontSize: '1.6rem', lineHeight: 1.15, letterSpacing: '0.03em' }}
+            style={{ color: 'var(--color-cream)', fontSize: '1.15rem', lineHeight: 1.15, letterSpacing: '0.03em' }}
           >
             <span style={{ whiteSpace: 'nowrap' }}>Just The Tip</span><br />Cigars
           </div>
