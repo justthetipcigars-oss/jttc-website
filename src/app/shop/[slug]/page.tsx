@@ -9,12 +9,6 @@ import ProductDetailView from '@/components/shop/ProductDetailView';
 
 export const revalidate = 3600;
 
-export async function generateStaticParams() {
-  const products = await fetchAllProducts();
-  const groups = groupByName(products);
-  return groups.map(g => ({ slug: nameToSlug(g.name) }));
-}
-
 interface Props {
   params: Promise<{ slug: string }>;
 }
