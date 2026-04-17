@@ -17,6 +17,27 @@ export const metadata = {
   },
 };
 
+// Local brand logos — transparent PNGs, preferred over Lightspeed product images
+const BRAND_LOGOS: Record<string, string> = {
+  'AJ Fernandez':               '/images/brands/aj-fernandez.png',
+  'AVO':                        '/images/brands/avo.png',
+  'Adventura':                  '/images/brands/adventura.png',
+  'All Saints':                 '/images/brands/all-saints.png',
+  'Baccarat':                   '/images/brands/baccarat.png',
+  'Black Label Trading Company':'/images/brands/black-label-trading-company.png',
+  'Camacho':                    '/images/brands/camacho.png',
+  'Casa Cuevas':                '/images/brands/casa-cuevas.png',
+  'Dunbarton Tobacco & Trust':  '/images/brands/dunbarton-tobacco-trust.png',
+  'Emilio':                     '/images/brands/emilio.png',
+  'Ferio Tego':                 '/images/brands/ferio-tego.png',
+  'Leaning House':              '/images/brands/leaning-house.png',
+  'Line Of Duty':               '/images/brands/line-of-duty.png',
+  'Oscar Valladeres':           '/images/brands/oscar-valladares.png',
+  'Patina':                     '/images/brands/patina.png',
+  'Rocky Patel':                '/images/brands/rocky-patel.png',
+  'Zino':                       '/images/brands/zino.png',
+};
+
 type BrandSummary = {
   name: string;
   productCount: number;
@@ -45,7 +66,11 @@ export default async function BrandsPage() {
     }
 
     brands = [...map.entries()]
-      .map(([name, { count, imageUrl }]) => ({ name, productCount: count, imageUrl }))
+      .map(([name, { count, imageUrl }]) => ({
+        name,
+        productCount: count,
+        imageUrl: BRAND_LOGOS[name] ?? imageUrl,
+      }))
       .sort((a, b) => a.name.localeCompare(b.name));
   } catch {
     // Fall through to empty state
