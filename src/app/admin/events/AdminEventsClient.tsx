@@ -326,12 +326,6 @@ export default function AdminEventsClient({ initialEvents }: { initialEvents: JT
               + Add Event
             </button>
           )}
-          <a
-            href="/admin/sentiment"
-            style={{ padding: '0.6rem 1rem', background: 'transparent', border: '1px solid var(--color-charcoal-mid)', color: 'var(--color-cream-dark)', fontSize: '0.72rem', letterSpacing: '0.1em', textDecoration: 'none', fontFamily: 'inherit' }}
-          >
-            Sentiment →
-          </a>
           <button
             onClick={handleSignOut}
             style={{ padding: '0.6rem 1rem', background: 'transparent', border: '1px solid var(--color-charcoal-mid)', color: 'var(--color-smoke)', fontSize: '0.72rem', letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'inherit' }}
