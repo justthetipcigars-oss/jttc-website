@@ -106,7 +106,7 @@ export default function Navbar() {
             className="display"
             style={{ color: 'var(--color-cream)', fontSize: '1.6rem', lineHeight: 1.15, letterSpacing: '0.03em' }}
           >
-            Just The Tip<br />Cigars
+            <span style={{ whiteSpace: 'nowrap' }}>Just The Tip</span><br />Cigars
           </div>
         </Link>
 
