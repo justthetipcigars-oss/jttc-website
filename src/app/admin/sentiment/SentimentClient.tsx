@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { CigarSentiment } from './mockData';
+import type { CigarSentiment } from '@/lib/sentiment';
 
 type SortKey = 'entries' | 'avgOverall' | 'wouldTryAgainPct' | 'ratingVariance';
 type FilterView = 'all' | 'loved' | 'polarizing' | 'sleepers' | 'declining';
@@ -246,9 +246,6 @@ export default function SentimentClient({ cigars }: { cigars: CigarSentiment[] }
         })}
       </div>
 
-      <div style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', marginTop: '1rem', textAlign: 'center' }}>
-        Mock data for layout preview. Live view will pull from Supabase <code style={{ color: 'var(--color-cream-dark)' }}>cigar_journal</code> table.
-      </div>
     </div>
   );
 }
