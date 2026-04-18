@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import JournalEntryClient from './JournalEntryClient';
+import AshtrayEntryClient from './AshtrayEntryClient';
 import { fetchAllProducts } from '@/lib/lightspeed';
 import { nameToSlug } from '@/lib/slug';
 
@@ -17,7 +17,7 @@ function parseDescription(desc: string) {
   return { wrapper, binder, filler };
 }
 
-export default async function JournalEntryPage({ params }: Props) {
+export default async function AshtrayEntryPage({ params }: Props) {
   const { slug } = await params;
 
   const supabase = await createClient();
@@ -63,13 +63,13 @@ export default async function JournalEntryPage({ params }: Props) {
       <main style={{ background: 'var(--color-pitch)', minHeight: '100vh', paddingTop: '80px' }}>
         <div className="max-w-3xl mx-auto px-6 py-16">
 
-          <a href="/account/journal" style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
-            ← Tasting Journal
+          <a href="/account/ashtray" style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
+            ← Ashtray
           </a>
 
           <div style={{ marginTop: '1.5rem', marginBottom: '3rem' }}>
             <div style={{ color: 'var(--color-terracotta)', fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              Tasting Journal
+              Ashtray
             </div>
             <h1 className="display" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 600, color: 'var(--color-cream)', lineHeight: 1.2 }}>
               {title}
@@ -81,7 +81,7 @@ export default async function JournalEntryPage({ params }: Props) {
             )}
           </div>
 
-          <JournalEntryClient entry={entry} prefill={prefill} revisions={revisions} />
+          <AshtrayEntryClient entry={entry} prefill={prefill} revisions={revisions} />
 
         </div>
       </main>

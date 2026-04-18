@@ -29,7 +29,7 @@ export default async function AdminSentimentPage() {
             background: 'rgba(217,122,94,0.08)', border: '1px solid rgba(217,122,94,0.3)',
             color: '#d97a5e', fontSize: '0.82rem',
           }}>
-            Could not load journal data: {error.message}. If you see this, the admin read policy may not be set up — run the SQL in <code>scripts/admin_sentiment_rls.sql</code>.
+            Could not load ashtray data: {error.message}. If you see this, the admin read policy may not be set up — run the SQL in <code>scripts/admin_sentiment_rls.sql</code>.
           </div>
         )}
 
@@ -51,7 +51,7 @@ function EmptyState() {
           <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Admin</div>
           <h1 style={{ color: 'var(--color-cream)', fontSize: '1.6rem', fontWeight: 600 }}>Customer Sentiment</h1>
           <div style={{ color: 'var(--color-smoke)', fontSize: '0.78rem', marginTop: '0.35rem' }}>
-            What the Tasting Journal is telling us about every cigar on the shelf.
+            What the Ashtray is telling us about every cigar on the shelf.
           </div>
         </div>
       </div>
@@ -60,14 +60,14 @@ function EmptyState() {
         padding: '3rem 2rem', textAlign: 'center',
       }}>
         <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-          No Journal Entries Yet
+          No Ashtray Entries Yet
         </div>
         <div style={{ color: 'var(--color-cream-dark)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: 540, margin: '0 auto' }}>
-          Once members start logging cigars in the Tasting Journal, this page will aggregate their ratings,
+          Once members start logging cigars in their Ashtray, this page will aggregate their ratings,
           flavor tags, and notes into per-cigar insights. Check back after the first handful of entries come in.
         </div>
         <div style={{ marginTop: '1.5rem', color: 'var(--color-smoke)', fontSize: '0.78rem' }}>
-          Members can start an entry from <code style={{ color: 'var(--color-cream-dark)' }}>/account/journal</code>.
+          Members can start an entry from <code style={{ color: 'var(--color-cream-dark)' }}>/account/ashtray</code>.
         </div>
       </div>
     </div>

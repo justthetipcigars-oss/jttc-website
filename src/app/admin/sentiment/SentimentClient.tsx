@@ -85,7 +85,7 @@ export default function SentimentClient({ cigars }: { cigars: CigarSentiment[] }
           <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Admin</div>
           <h1 style={{ color: 'var(--color-cream)', fontSize: '1.6rem', fontWeight: 600 }}>Customer Sentiment</h1>
           <div style={{ color: 'var(--color-smoke)', fontSize: '0.78rem', marginTop: '0.35rem' }}>
-            What the Tasting Journal is telling us about every cigar on the shelf.
+            What the Ashtray is telling us about every cigar on the shelf.
           </div>
         </div>
         <a
@@ -99,7 +99,7 @@ export default function SentimentClient({ cigars }: { cigars: CigarSentiment[] }
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
         <Kpi label="Cigars Tracked" value={String(totals.cigars)} />
-        <Kpi label="Total Journal Entries" value={String(totals.entries)} />
+        <Kpi label="Total Ashtray Entries" value={String(totals.entries)} />
         <Kpi label="Weighted Avg Rating" value={totals.avgRating.toFixed(2)} suffix=" / 5" />
         <Kpi label="Would Try Again" value={totals.pctReorder.toFixed(0) + '%'} />
       </div>

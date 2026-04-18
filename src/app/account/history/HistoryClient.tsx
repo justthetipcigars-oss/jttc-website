@@ -228,7 +228,7 @@ export default function HistoryClient() {
                 View in Shop
               </a>
               <a
-                href={`/account/journal/${nameToSlug(selected.name)}`}
+                href={`/account/ashtray/${nameToSlug(selected.name)}`}
                 style={{
                   display: 'block', textAlign: 'center',
                   padding: '0.75rem 1rem',
@@ -240,7 +240,7 @@ export default function HistoryClient() {
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                 }}
               >
-                Tasting Journal
+                Add to Ashtray
               </a>
             </div>
 

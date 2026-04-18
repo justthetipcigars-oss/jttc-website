@@ -22,7 +22,6 @@ const accountLinks = [
   { label: 'Purchase History',   href: '/account/history'   },
   { label: 'My Humidor',         href: '/account/humidor'   },
   { label: 'My Ashtray',         href: '/account/ashtray'   },
-  { label: 'Tasting Journal',    href: '/account/journal'   },
 ];
 
 export default function Navbar() {
@@ -111,7 +110,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-6">
           {links.map(l => (
             <Link
               key={l.href}
@@ -279,7 +278,7 @@ export default function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="lg:hidden flex flex-col gap-1.5 p-2"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -292,7 +291,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div
-          className="md:hidden px-6 pb-6 flex flex-col gap-4"
+          className="lg:hidden px-6 pb-6 flex flex-col gap-4"
           style={{ background: 'rgba(14,12,10,0.98)', borderTop: '1px solid var(--color-charcoal-mid)' }}
         >
           {links.map(l => (

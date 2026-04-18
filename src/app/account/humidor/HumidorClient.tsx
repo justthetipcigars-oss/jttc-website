@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LightspeedProduct } from '@/lib/lightspeed';
 import { groupByName, ProductGroup } from '@/lib/productGroups';
 import CigarModal from '@/components/shop/CigarModal';
-import AshtrayModal, { AshtrayEntry } from '@/components/AshtrayModal';
+import { nameToSlug } from '@/lib/slug';
 
 type HumidorItem = {
   id: string;
@@ -30,7 +31,12 @@ export default function HumidorClient({
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
   const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
-  const [pendingAshtray, setPendingAshtray] = useState<HumidorItem | null>(null);
+  const router = useRouter();
+
+  async function moveToAshtray(item: HumidorItem) {
+    await removeFromHumidor(item);
+    router.push(`/account/ashtray/${nameToSlug(item.product_name)}?new=1`);
+  }
 
   // Build cigar groups from the full catalog (no stock filter — you can own anything)
   const cigarGroups = useMemo(() => {
@@ -230,7 +236,7 @@ export default function HumidorClient({
               </div>
 
               <button
-                onClick={() => setPendingAshtray(item)}
+                onClick={() => moveToAshtray(item)}
                 style={{
                   width: '100%',
                   padding: '0.6rem',
@@ -250,24 +256,6 @@ export default function HumidorClient({
             </div>
           ))}
         </div>
-      )}
-
-      {/* Ashtray modal */}
-      {pendingAshtray && (
-        <AshtrayModal
-          item={{
-            product_id: pendingAshtray.product_id,
-            product_name: pendingAshtray.product_name,
-            brand: pendingAshtray.brand,
-            size: pendingAshtray.size,
-            image_url: pendingAshtray.image_url,
-          }}
-          onDone={(_entry: AshtrayEntry) => {
-            removeFromHumidor(pendingAshtray);
-            setPendingAshtray(null);
-          }}
-          onClose={() => setPendingAshtray(null)}
-        />
       )}
 
       {/* Product detail modal */}

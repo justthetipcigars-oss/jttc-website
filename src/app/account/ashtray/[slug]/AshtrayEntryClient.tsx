@@ -13,7 +13,7 @@ const FLAVOR_CATEGORIES = [
 
 const METER_LABELS = ['Very Mild', 'Mild', 'Medium', 'Med-Full', 'Full'];
 
-type JournalEntry = Record<string, unknown> & {
+type AshtrayEntry = Record<string, unknown> & {
   id: string;
   product_id: string;
   cigar_name: string;
@@ -143,12 +143,12 @@ function FlavorMeter({ label, value, onChange }: { label: string; value: number 
   );
 }
 
-export default function JournalEntryClient({
+export default function AshtrayEntryClient({
   entry,
   prefill,
   revisions,
 }: {
-  entry: JournalEntry | null;
+  entry: AshtrayEntry | null;
   prefill: Prefill | null;
   revisions: Revision[];
 }) {
@@ -203,7 +203,7 @@ export default function JournalEntryClient({
     try {
       const method = entry ? 'PATCH' : 'POST';
       const body   = entry ? { id: entry.id, ...form } : form;
-      const res    = await fetch('/api/account/journal', {
+      const res    = await fetch('/api/account/ashtray', {
         method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
       });
       const json = await res.json();

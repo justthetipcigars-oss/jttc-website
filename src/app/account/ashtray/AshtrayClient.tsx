@@ -1,361 +1,277 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Image from 'next/image';
-import { LightspeedProduct } from '@/lib/lightspeed';
-import { groupByName, ProductGroup } from '@/lib/productGroups';
-import CigarModal from '@/components/shop/CigarModal';
-import AshtrayModal, { AshtrayEntry } from '@/components/AshtrayModal';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { nameToSlug } from '@/lib/slug';
 
-type AshtrayItem = AshtrayEntry & { smoked_at: string };
-
-const STATUS_LABEL: Record<string, string> = {
-  pending:   'Review Pending',
-  rated:     'Quick Rated',
-  journaled: 'Journal Entry',
+type AshtrayEntry = {
+  id: string;
+  product_id: string;
+  cigar_name: string;
+  brand: string;
+  size: string;
+  overall_rating: number | null;
+  date_smoked: string | null;
+  updated_at: string;
 };
 
-function StarDisplay({ rating }: { rating: number }) {
+type HistoryCigar = {
+  name: string;
+  totalQty: number;
+  macro: string;
+};
+
+function StarDisplay({ rating }: { rating: number | null }) {
+  if (!rating) return <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>Not rated</span>;
   return (
-    <span style={{ color: 'var(--color-terracotta)', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
+    <span style={{ color: 'var(--color-terracotta)', fontSize: '0.95rem', letterSpacing: '0.05em' }}>
       {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
     </span>
   );
 }
 
-export default function AshtrayClient({
-  initialItems,
-  products,
-}: {
-  initialItems: AshtrayItem[];
-  products: LightspeedProduct[];
-}) {
-  const [items, setItems] = useState<AshtrayItem[]>(initialItems);
-  const [showBrowse, setShowBrowse] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
-  const [pendingItem, setPendingItem] = useState<{ product_id: string; product_name: string; brand: string; size: string; image_url: string | null } | null>(null);
+export default function AshtrayClient() {
+  const [entries, setEntries]       = useState<AshtrayEntry[]>([]);
+  const [history, setHistory]       = useState<HistoryCigar[]>([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [search, setSearch]         = useState('');
 
-  const cigarGroups = useMemo(() => groupByName(products.filter(p => p.isCigar)), [products]);
+  const loadEntries = useCallback(async () => {
+    try {
+      const res = await fetch('/api/account/ashtray');
+      const json = await res.json();
+      if (json.error) setError(json.error);
+      else setEntries(json.entries ?? []);
+    } catch {
+      setError('Failed to load ashtray');
+    } finally {
+      setLoadingEntries(false);
+    }
+  }, []);
 
-  const brands = useMemo(
-    () => [...new Set(cigarGroups.map(g => g.brand).filter(Boolean))].sort(),
-    [cigarGroups]
+  const loadHistory = useCallback(async () => {
+    try {
+      const res = await fetch('/api/account/history');
+      const json = await res.json();
+      if (!json.error) setHistory(json.cigars ?? []);
+    } catch {
+      // non-fatal — unlogged section just won't show
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEntries();
+    loadHistory();
+  }, [loadEntries, loadHistory]);
+
+  const loggedIds = useMemo(() => new Set(entries.map(e => e.cigar_name.toLowerCase())), [entries]);
+
+  const unlogged = useMemo(() =>
+    history.filter(c => !loggedIds.has(c.name.toLowerCase())),
+    [history, loggedIds]
   );
 
-  const filteredGroups = useMemo(() => {
-    let groups = cigarGroups;
-    if (selectedBrand) groups = groups.filter(g => g.brand === selectedBrand);
-    if (search) {
-      const q = search.toLowerCase();
-      groups = groups.filter(g => g.name.toLowerCase().includes(q) || g.brand.toLowerCase().includes(q));
-    }
-    return groups;
-  }, [cigarGroups, selectedBrand, search]);
+  const filteredEntries = useMemo(() => {
+    if (!search) return entries;
+    const q = search.toLowerCase();
+    return entries.filter(e => e.cigar_name.toLowerCase().includes(q) || e.brand?.toLowerCase().includes(q));
+  }, [entries, search]);
 
-  async function removeItem(id: string) {
-    await fetch('/api/account/ashtray', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    setItems(prev => prev.filter(i => i.id !== id));
+  const filteredUnlogged = useMemo(() => {
+    if (!search) return unlogged;
+    const q = search.toLowerCase();
+    return unlogged.filter(c => c.name.toLowerCase().includes(q));
+  }, [unlogged, search]);
+
+  if (error && error !== 'not_linked') {
+    return (
+      <div style={{ background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '2rem' }}>
+        <p style={{ color: 'var(--color-smoke)' }}>{error}</p>
+      </div>
+    );
   }
-
-  const pending   = items.filter(i => i.status === 'pending');
-  const reviewed  = items.filter(i => i.status !== 'pending');
 
   return (
     <div>
-      {/* Add cigar button */}
-      <div style={{ marginBottom: '2rem' }}>
-        <button
-          onClick={() => setShowBrowse(!showBrowse)}
+      {/* Search */}
+      <div style={{ marginBottom: '2.5rem' }}>
+        <input
+          type="text"
+          placeholder="Search your ashtray…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           style={{
-            padding: '0.75rem 1.75rem',
-            background: 'var(--color-terracotta)',
+            width: '100%',
+            maxWidth: '400px',
+            background: 'var(--color-charcoal)',
+            border: '1px solid var(--color-charcoal-mid)',
             color: 'var(--color-cream)',
-            border: 'none',
-            fontFamily: 'var(--font-body)',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
+            padding: '0.55rem 1rem',
+            fontSize: '0.875rem',
+            outline: 'none',
           }}
-        >
-          {showBrowse ? '× Close Catalog' : '+ Add a Smoke'}
-        </button>
+        />
       </div>
 
-      {/* Catalog browse panel */}
-      {showBrowse && (
-        <div style={{ marginBottom: '3rem', background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            <input
-              autoFocus
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by name or brand..."
-              style={{
-                flex: 1, minWidth: 200,
-                padding: '0.6rem 1rem',
-                background: 'var(--color-pitch)',
-                border: '1px solid var(--color-charcoal-mid)',
-                color: 'var(--color-cream)',
-                fontSize: '0.875rem',
-                outline: 'none',
-              }}
-            />
-            <select
-              value={selectedBrand}
-              onChange={e => setSelectedBrand(e.target.value)}
-              style={{
-                padding: '0.6rem 1rem',
-                background: 'var(--color-pitch)',
-                border: '1px solid var(--color-charcoal-mid)',
-                color: selectedBrand ? 'var(--color-cream)' : 'var(--color-smoke)',
-                fontSize: '0.875rem',
-                outline: 'none',
-              }}
-            >
-              <option value="">All Brands</option>
-              {brands.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-          </div>
-
-          <div style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', letterSpacing: '0.08em', marginBottom: '1rem' }}>
-            {filteredGroups.length} product{filteredGroups.length !== 1 ? 's' : ''}
-          </div>
-
-          {filteredGroups.length === 0 ? (
-            <p style={{ color: 'var(--color-smoke)', fontSize: '0.85rem' }}>No products match your search.</p>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: '1px',
-              background: 'var(--color-charcoal-mid)',
-              maxHeight: '520px',
-              overflowY: 'auto',
-            }}>
-              {filteredGroups.map(g => (
-                <CatalogTile key={g.name} group={g} onSelect={() => setOpenProduct(g)} />
-              ))}
-            </div>
+      {/* Logged entries */}
+      <section style={{ marginBottom: '4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-charcoal-mid)', paddingBottom: '0.75rem' }}>
+          <h2 style={{ color: 'var(--color-cream)', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
+            My Entries
+          </h2>
+          {!loadingEntries && (
+            <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>
+              {filteredEntries.length} cigar{filteredEntries.length !== 1 ? 's' : ''}
+            </span>
           )}
         </div>
-      )}
 
-      {/* Empty state */}
-      {items.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', border: '1px dashed var(--color-charcoal-mid)' }}>
-          <p style={{ color: 'var(--color-smoke)', fontSize: '0.95rem', lineHeight: 1.7 }}>
-            Nothing in the ashtray yet. Move smoked cigars from your humidor or add them directly above.
-          </p>
-        </div>
-      )}
-
-      {/* Pending review section */}
-      {pending.length > 0 && (
-        <div style={{ marginBottom: '3rem' }}>
-          <div style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--color-charcoal-mid)' }}>
-            Review Pending — {pending.length}
+        {loadingEntries ? (
+          <SkeletonGrid count={4} />
+        ) : filteredEntries.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', border: '1px dashed var(--color-charcoal-mid)' }}>
+            <p style={{ color: 'var(--color-smoke)', fontSize: '0.9rem' }}>
+              {search ? 'No entries match your search.' : 'No ashtray entries yet. Start one below.'}
+            </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
-            {pending.map(item => (
-              <AshtrayCard key={item.id} item={item} onRemove={removeItem} />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
+            {filteredEntries.map(entry => (
+              <EntryCard key={entry.id} entry={entry} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {/* Reviewed section */}
-      {reviewed.length > 0 && (
-        <div>
-          {pending.length > 0 && (
-            <div style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--color-charcoal-mid)' }}>
-              Reviewed — {reviewed.length}
-            </div>
+      {/* Unlogged cigars */}
+      <section>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-charcoal-mid)', paddingBottom: '0.75rem' }}>
+          <h2 style={{ color: 'var(--color-cream)', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
+            Start a New Entry
+          </h2>
+          {!loadingHistory && (
+            <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>
+              {filteredUnlogged.length} cigar{filteredUnlogged.length !== 1 ? 's' : ''} from your purchase history
+            </span>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
-            {reviewed.map(item => (
-              <AshtrayCard key={item.id} item={item} onRemove={removeItem} />
+        </div>
+
+        {loadingHistory ? (
+          <SkeletonGrid count={6} />
+        ) : error === 'not_linked' ? (
+          <div style={{ background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '1.5rem' }}>
+            <p style={{ color: 'var(--color-smoke)', fontSize: '0.875rem', lineHeight: 1.7 }}>
+              Link your in-store account in{' '}
+              <a href="/account/profile" style={{ color: 'var(--color-terracotta)' }}>My Profile</a>{' '}
+              to see cigars from your purchase history here.
+            </p>
+          </div>
+        ) : filteredUnlogged.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--color-charcoal-mid)' }}>
+            <p style={{ color: 'var(--color-smoke)', fontSize: '0.9rem' }}>
+              {search ? 'No unlogged cigars match your search.' : 'You\'ve logged every cigar you\'ve purchased. Nice work.'}
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
+            {filteredUnlogged.map(cigar => (
+              <UnloggedCard key={cigar.name} cigar={cigar} />
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Variant picker modal */}
-      {openProduct && (
-        <CigarModal
-          group={openProduct}
-          onClose={() => setOpenProduct(null)}
-          onAddToHumidor={variant => {
-            setPendingItem({
-              product_id: variant.id,
-              product_name: variant.name,
-              brand: variant.brand,
-              size: variant.size,
-              image_url: variant.imageUrl,
-            });
-            setOpenProduct(null);
-            setShowBrowse(false);
-          }}
-        />
-      )}
-
-      {/* Ashtray modal */}
-      {pendingItem && (
-        <AshtrayModal
-          item={pendingItem}
-          onDone={(entry: AshtrayEntry) => {
-            setItems(prev => [entry as AshtrayItem, ...prev]);
-            setPendingItem(null);
-          }}
-          onClose={() => setPendingItem(null)}
-        />
-      )}
+        )}
+      </section>
     </div>
   );
 }
 
-function AshtrayCard({ item, onRemove }: { item: AshtrayItem; onRemove: (id: string) => void }) {
-  const [confirming, setConfirming] = useState(false);
-
-  const smokedDate = item.smoked_at
-    ? new Date(item.smoked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+function EntryCard({ entry }: { entry: AshtrayEntry }) {
+  const slug = nameToSlug(entry.cigar_name);
+  const dateSuffix = entry.date_smoked
+    ? new Date(entry.date_smoked).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null;
 
   return (
-    <div style={{ background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '1.5rem' }}>
-
-      {/* Image */}
-      {item.image_url && (
-        <div style={{ width: '100%', aspectRatio: '3/2', position: 'relative', marginBottom: '1rem', background: 'var(--color-pitch)', overflow: 'hidden' }}>
-          <Image src={item.image_url} alt={item.product_name} fill className="object-contain" style={{ padding: '0.5rem' }} sizes="300px" />
+    <a
+      href={`/account/ashtray/${slug}`}
+      style={{ display: 'block', background: 'var(--color-charcoal)', padding: '1.5rem', textDecoration: 'none' }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-charcoal-mid)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-charcoal)')}
+    >
+      {entry.brand && (
+        <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+          {entry.brand}
         </div>
       )}
-
-      {/* Name / brand / size */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--color-cream)', fontSize: '0.95rem', lineHeight: 1.4, marginBottom: '0.2rem' }}>
-          {item.product_name}
+      <div style={{ color: 'var(--color-cream)', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.3, marginBottom: '0.5rem' }}>
+        {entry.cigar_name}
+      </div>
+      {entry.size && (
+        <div style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', marginBottom: '0.75rem' }}>
+          {entry.size}
         </div>
-        <div style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>
-          {item.brand}{item.brand && item.size ? ' · ' : ''}{item.size}
+      )}
+      <div style={{ marginBottom: '0.5rem' }}>
+        <StarDisplay rating={entry.overall_rating} />
+      </div>
+      {dateSuffix && (
+        <div style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', marginTop: '0.75rem' }}>
+          Smoked {dateSuffix}
         </div>
-        {smokedDate && (
-          <div style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', marginTop: '0.2rem' }}>
-            {smokedDate}
-          </div>
-        )}
-      </div>
+      )}
+    </a>
+  );
+}
 
-      {/* Status / rating */}
-      <div style={{ marginBottom: '1rem' }}>
-        {item.status === 'rated' && item.quick_rating ? (
-          <StarDisplay rating={item.quick_rating} />
-        ) : (
-          <span style={{
-            display: 'inline-block',
-            padding: '0.2rem 0.5rem',
-            fontSize: '0.65rem',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            border: '1px solid var(--color-charcoal-mid)',
-            color: item.status === 'pending' ? 'var(--color-smoke)' : 'var(--color-terracotta)',
-          }}>
-            {STATUS_LABEL[item.status] ?? item.status}
-          </span>
-        )}
-      </div>
+function UnloggedCard({ cigar }: { cigar: HistoryCigar }) {
+  const slug = nameToSlug(cigar.name);
 
-      {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <a
-          href={`/account/journal/${nameToSlug(item.product_name)}`}
-          style={{
-            display: 'block', width: '100%', padding: '0.55rem',
-            background: 'var(--color-terracotta)',
-            color: 'var(--color-cream)',
-            fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.1em',
-            textTransform: 'uppercase', textDecoration: 'none',
-            textAlign: 'center',
-          }}
-        >
-          {item.status === 'journaled' ? 'View Journal Entry' : 'Open Journal Entry'}
-        </a>
-
-        {confirming ? (
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => onRemove(item.id)}
-              style={{ flex: 1, padding: '0.5rem', background: '#7A1A0A', border: 'none', color: 'var(--color-cream)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-            >
-              Confirm Remove
-            </button>
-            <button
-              onClick={() => setConfirming(false)}
-              style={{ flex: 1, padding: '0.5rem', background: 'transparent', border: '1px solid var(--color-charcoal-mid)', color: 'var(--color-smoke)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setConfirming(true)}
-            style={{
-              width: '100%', padding: '0.55rem',
-              background: 'transparent',
-              border: '1px solid var(--color-charcoal-mid)',
-              color: 'var(--color-smoke)',
-              fontSize: '0.72rem', letterSpacing: '0.08em',
-              textTransform: 'uppercase', cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-terracotta)'; e.currentTarget.style.color = 'var(--color-terracotta)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)'; e.currentTarget.style.color = 'var(--color-smoke)'; }}
-          >
-            Remove
-          </button>
-        )}
+  return (
+    <div style={{ background: 'var(--color-charcoal)', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
+      <div>
+        <div style={{ color: 'var(--color-cream)', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.3, marginBottom: '0.35rem' }}>
+          {cigar.name}
+        </div>
+        <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
+          {cigar.totalQty} unit{cigar.totalQty !== 1 ? 's' : ''} purchased
+        </div>
       </div>
+      <a
+        href={`/account/ashtray/${slug}?new=1`}
+        style={{
+          display: 'block',
+          textAlign: 'center',
+          padding: '0.55rem 1rem',
+          background: 'transparent',
+          border: '1px solid var(--color-charcoal-mid)',
+          color: 'var(--color-smoke)',
+          fontSize: '0.72rem',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          textDecoration: 'none',
+          transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-terracotta)'; e.currentTarget.style.color = 'var(--color-terracotta)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)'; e.currentTarget.style.color = 'var(--color-smoke)'; }}
+      >
+        Begin Ashtray Entry →
+      </a>
     </div>
   );
 }
 
-function CatalogTile({ group, onSelect }: { group: ProductGroup; onSelect: () => void }) {
+function SkeletonGrid({ count }: { count: number }) {
   return (
-    <button
-      onClick={onSelect}
-      style={{ display: 'flex', flexDirection: 'column', background: 'var(--color-pitch)', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
-      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-charcoal-mid)')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-pitch)')}
-    >
-      <div style={{ width: '100%', aspectRatio: '3/2', position: 'relative', background: 'var(--color-charcoal-mid)', overflow: 'hidden' }}>
-        {group.imageUrl ? (
-          <Image src={group.imageUrl} alt={group.name} fill className="object-contain" style={{ padding: '0.5rem' }} sizes="200px" />
-        ) : (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', padding: '0.4rem' }}>
-            <span style={{ color: 'var(--color-charcoal-light)', fontSize: '0.6rem', letterSpacing: '0.08em' }}>No Image</span>
-          </div>
-        )}
-      </div>
-      <div style={{ padding: '0.65rem 0.75rem', flex: 1 }}>
-        {group.brand && (
-          <div style={{ color: 'var(--color-terracotta)', fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
-            {group.brand}
-          </div>
-        )}
-        <div style={{ color: 'var(--color-cream)', fontSize: '0.8rem', fontWeight: 600, lineHeight: 1.3 }}>{group.name}</div>
-        <div style={{ color: 'var(--color-smoke)', fontSize: '0.65rem', marginTop: '0.2rem' }}>
-          {group.variants.length} variant{group.variants.length !== 1 ? 's' : ''}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} style={{ background: 'var(--color-charcoal)', padding: '1.5rem' }}>
+          <div style={{ height: '10px', width: '60px', background: 'var(--color-charcoal-mid)', marginBottom: '0.5rem', opacity: 0.6 }} />
+          <div style={{ height: '16px', width: '80%', background: 'var(--color-charcoal-mid)', marginBottom: '0.35rem', opacity: 0.5 - i * 0.04 }} />
+          <div style={{ height: '12px', width: '40%', background: 'var(--color-charcoal-mid)', opacity: 0.3 }} />
         </div>
-      </div>
-    </button>
+      ))}
+    </div>
   );
 }
