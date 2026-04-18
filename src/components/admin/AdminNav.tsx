@@ -50,6 +50,22 @@ export default function AdminNav({ active }: { active: 'events' | 'sentiment' })
           </Link>
         );
       })}
+      <Link
+        href="/"
+        style={{
+          marginLeft: 'auto',
+          padding: '0.7rem 1.25rem',
+          fontSize: '0.7rem',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          fontWeight: 500,
+          textDecoration: 'none',
+          color: 'var(--color-smoke)',
+          alignSelf: 'center',
+        }}
+      >
+        ← Back to Site
+      </Link>
     </div>
   );
 }
