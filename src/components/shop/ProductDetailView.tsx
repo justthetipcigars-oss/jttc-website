@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { LightspeedProduct } from '@/lib/lightspeed';
 import { ProductGroup } from '@/lib/productGroups';
+import { nameToSlug } from '@/lib/slug';
+import WishlistHeart from './WishlistHeart';
 
 /* ── shared table helpers (duplicated from CigarModal to keep files independent) ── */
 function packRank(quantity: string): number {
@@ -99,11 +102,18 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
 }
 
 /* ── Main detail view ── */
-interface Props {
-  group: ProductGroup;
+interface LocalImages {
+  main?: string;
+  box?: string;
+  single?: string;
 }
 
-export default function ProductDetailView({ group }: Props) {
+interface Props {
+  group: ProductGroup;
+  localImages?: LocalImages | null;
+}
+
+export default function ProductDetailView({ group, localImages }: Props) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -115,8 +125,11 @@ export default function ProductDetailView({ group }: Props) {
   const rows = buildRows(group.variants);
   const hasSize = group.variants.some(v => v.size);
 
-  // Collect all unique images across all variants
-  const allImages = [...new Set(group.variants.flatMap(v => v.allImages))];
+  // Build image list: local images take priority over Lightspeed CDN images
+  const lightspeedImages = [...new Set(group.variants.flatMap(v => v.allImages))];
+  const allImages = localImages
+    ? [localImages.main, localImages.box, localImages.single].filter(Boolean) as string[]
+    : lightspeedImages;
 
   // Use the first non-empty description across variants
   const description = group.variants.find(v => v.description)?.description || '';
@@ -151,10 +164,31 @@ export default function ProductDetailView({ group }: Props) {
             {priceDisplay}
           </div>
           {description && (
-            <p style={{ color: 'var(--color-smoke)', fontSize: '0.9rem', lineHeight: 1.7, marginTop: '0.5rem' }}>
-              {description}
-            </p>
+            <div
+              style={{ color: 'var(--color-smoke)', fontSize: '0.9rem', lineHeight: 1.7, marginTop: '0.5rem' }}
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
           )}
+          <Link
+            href={`/account/ashtray/${nameToSlug(group.name)}?new=1`}
+            style={{
+              display: 'inline-block',
+              marginTop: '0.75rem',
+              padding: '0.6rem 1.1rem',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              background: 'transparent',
+              color: 'var(--color-terracotta)',
+              border: '1px solid var(--color-terracotta)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              alignSelf: 'flex-start',
+            }}
+          >
+            + Add to My Ashtray
+          </Link>
           <div
             className="mt-auto pt-4"
             style={{ borderTop: '1px solid var(--color-charcoal-mid)', color: 'var(--color-charcoal-light)', fontSize: '0.75rem' }}
@@ -251,7 +285,15 @@ export default function ProductDetailView({ group }: Props) {
                     <button style={cartBtnStyle}>+ Cart</button>
                   </td>
                   <td style={tdStyle}>
-                    <button aria-label="Add to wishlist" style={wishlistBtnStyle}>♡</button>
+                    <WishlistHeart
+                      variant={{
+                        id: variant.id,
+                        name: variant.name,
+                        brand: variant.brand,
+                        size: variant.size,
+                        imageUrl: variant.imageUrl,
+                      }}
+                    />
                   </td>
                 </tr>
               ))}
@@ -338,15 +380,3 @@ const cartBtnStyle: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
-const wishlistBtnStyle: React.CSSProperties = {
-  width: 34,
-  height: 34,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'transparent',
-  border: '1px solid var(--color-charcoal-mid)',
-  color: 'var(--color-smoke)',
-  fontSize: '1rem',
-  cursor: 'pointer',
-};

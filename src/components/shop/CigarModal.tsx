@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { LightspeedProduct } from '@/lib/lightspeed';
+import { nameToSlug } from '@/lib/slug';
+import WishlistHeart from './WishlistHeart';
 export type { ProductGroup, CigarGroup } from '@/lib/productGroups';
 export { groupByName } from '@/lib/productGroups';
 import type { ProductGroup } from '@/lib/productGroups';
@@ -148,6 +151,26 @@ export default function CigarModal({ group, onClose, onAddToHumidor }: Props) {
             <div style={{ color: 'var(--color-amber)', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem' }}>
               {priceDisplay}
             </div>
+            <Link
+              href={`/account/ashtray/${nameToSlug(group.name)}?new=1`}
+              onClick={onClose}
+              style={{
+                display: 'inline-block',
+                marginTop: '0.65rem',
+                padding: '0.4rem 0.85rem',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                background: 'transparent',
+                color: 'var(--color-terracotta)',
+                border: '1px solid var(--color-terracotta)',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              + Add to My Ashtray
+            </Link>
           </div>
         </div>
 
@@ -302,25 +325,17 @@ export default function CigarModal({ group, onClose, onAddToHumidor }: Props) {
                         </button>
                       </td>
 
-                      {/* Wishlist – placeholder */}
+                      {/* Wishlist */}
                       <td style={tdStyle}>
-                        <button
-                          aria-label="Add to wishlist"
-                          style={{
-                            width: 34,
-                            height: 34,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: 'transparent',
-                            border: '1px solid var(--color-charcoal-mid)',
-                            color: 'var(--color-smoke)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
+                        <WishlistHeart
+                          variant={{
+                            id: variant.id,
+                            name: variant.name,
+                            brand: variant.brand,
+                            size: variant.size,
+                            imageUrl: variant.imageUrl,
                           }}
-                        >
-                          ♡
-                        </button>
+                        />
                       </td>
                     </>
                   )}
