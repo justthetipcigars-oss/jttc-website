@@ -2,13 +2,17 @@ import { redis } from './redis';
 
 const BASE_URL = process.env.LIGHTSPEED_BASE_URL || 'https://justthetipcigars.retail.lightspeed.app/api/2.0';
 const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
-const CACHE_KEY = 'ls:all_products';
+const CACHE_KEY = 'ls:all_products:v2';
 const CACHE_TTL = 3600;
 
 const SWAG_TYPES = new Set([
   'Short Sleeve Tee', 'Hats', 'Beanie', 'Hoodie', 'Trucker',
   'Long Sleeve Tee', 'Shirts', 'Flex Fit', 'Polo',
 ]);
+
+// Lightspeed root category IDs — used to filter action buttons (humidor, cellar, etc.)
+const PIPES_ROOT_ID = '2efdcf82-705f-43ba-bd56-c01a44a6d576';
+const PIPE_TOBACCO_ROOT_ID = '8ad2775f-801f-4966-be20-996041818acd';
 
 const CIGAR_SIZES = [
   'robusto', 'toro', 'gordo', 'corona', 'lancero', 'churchill', 'belicoso',
@@ -38,6 +42,8 @@ export interface LightspeedProduct {
   isSingle: boolean;
   isBox: boolean;
   isCigar: boolean;
+  isPipe: boolean;
+  isPipeTobacco: boolean;
   sku: string;
   imageUrl: string | null;
   category: string;
@@ -53,6 +59,9 @@ function mapProduct(p: Record<string, unknown>): LightspeedProduct {
   const quantity = variantOptions.find(v => v.name === 'Quantity')?.value || '';
   const quantityLower = quantity.toLowerCase();
 
+  const rootCategoryId = (p.product_category as { category_path?: Array<{ id: string }> } | null)
+    ?.category_path?.[0]?.id || '';
+
   return {
     id: p.id as string,
     name: p.name as string,
@@ -64,6 +73,8 @@ function mapProduct(p: Record<string, unknown>): LightspeedProduct {
     isSingle: quantityLower === 'single' || quantityLower === '',
     isBox: quantityLower.startsWith('box') || quantityLower.startsWith('pack') || quantityLower.startsWith('case'),
     isCigar: isCigarSize(size),
+    isPipe: rootCategoryId === PIPES_ROOT_ID,
+    isPipeTobacco: rootCategoryId === PIPE_TOBACCO_ROOT_ID,
     sku: p.sku as string,
     variantOptions,
     category: (() => {

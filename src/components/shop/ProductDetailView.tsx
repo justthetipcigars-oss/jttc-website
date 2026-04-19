@@ -124,6 +124,9 @@ export default function ProductDetailView({ group, localImages }: Props) {
 
   const rows = buildRows(group.variants);
   const hasSize = group.variants.some(v => v.size);
+  const isCigar = group.variants.some(v => v.isCigar);
+  const isPipe = group.variants.some(v => v.isPipe);
+  const isPipeTobacco = group.variants.some(v => v.isPipeTobacco);
 
   // Build image list: local images take priority over Lightspeed CDN images
   const lightspeedImages = [...new Set(group.variants.flatMap(v => v.allImages))];
@@ -137,6 +140,13 @@ export default function ProductDetailView({ group, localImages }: Props) {
   const priceDisplay = group.minPrice === group.maxPrice
     ? `$${group.minPrice.toFixed(2)}`
     : `From $${group.minPrice.toFixed(2)}`;
+
+  const slug = nameToSlug(group.name);
+  const actions: Array<{ label: string; href: string }> = [];
+  if (isCigar)       actions.push({ label: '+ Add to My Ashtray',         href: `/account/ashtray/${slug}?new=1` });
+  if (isPipe)        actions.push({ label: '+ Add to My Pipe Collection', href: `/account/pipes/collection/${slug}?new=1` });
+  if (isPipeTobacco) actions.push({ label: '+ Add to My Cellar',          href: `/account/pipes/cellar/${slug}?new=1` });
+  if (isPipeTobacco) actions.push({ label: '+ Add to My Tasting Guide',   href: `/account/pipes/tasting-guide/${slug}?new=1` });
 
   return (
     <>
@@ -169,26 +179,31 @@ export default function ProductDetailView({ group, localImages }: Props) {
               dangerouslySetInnerHTML={{ __html: description }}
             />
           )}
-          <Link
-            href={`/account/ashtray/${nameToSlug(group.name)}?new=1`}
-            style={{
-              display: 'inline-block',
-              marginTop: '0.75rem',
-              padding: '0.6rem 1.1rem',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              background: 'transparent',
-              color: 'var(--color-terracotta)',
-              border: '1px solid var(--color-terracotta)',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-              alignSelf: 'flex-start',
-            }}
-          >
-            + Add to My Ashtray
-          </Link>
+          {actions.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+              {actions.map(a => (
+                <Link
+                  key={a.href}
+                  href={a.href}
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.6rem 1.1rem',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    background: 'transparent',
+                    color: 'var(--color-terracotta)',
+                    border: '1px solid var(--color-terracotta)',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {a.label}
+                </Link>
+              ))}
+            </div>
+          )}
           <div
             className="mt-auto pt-4"
             style={{ borderTop: '1px solid var(--color-charcoal-mid)', color: 'var(--color-charcoal-light)', fontSize: '0.75rem' }}

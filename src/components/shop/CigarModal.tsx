@@ -83,10 +83,20 @@ export default function CigarModal({ group, onClose, onAddToHumidor }: Props) {
 
   const rows = buildRows(group.variants);
   const hasSize = group.variants.some(v => v.size);
+  const isCigar = group.variants.some(v => v.isCigar);
+  const isPipe = group.variants.some(v => v.isPipe);
+  const isPipeTobacco = group.variants.some(v => v.isPipeTobacco);
 
   const priceDisplay = group.minPrice === group.maxPrice
     ? `$${group.minPrice.toFixed(2)}`
     : `From $${group.minPrice.toFixed(2)}`;
+
+  const slug = nameToSlug(group.name);
+  const actions: Array<{ label: string; href: string }> = [];
+  if (isCigar)       actions.push({ label: '+ Add to My Ashtray',         href: `/account/ashtray/${slug}?new=1` });
+  if (isPipe)        actions.push({ label: '+ Add to My Pipe Collection', href: `/account/pipes/collection/${slug}?new=1` });
+  if (isPipeTobacco) actions.push({ label: '+ Add to My Cellar',          href: `/account/pipes/cellar/${slug}?new=1` });
+  if (isPipeTobacco) actions.push({ label: '+ Add to My Tasting Guide',   href: `/account/pipes/tasting-guide/${slug}?new=1` });
 
   return (
     <div
@@ -151,26 +161,32 @@ export default function CigarModal({ group, onClose, onAddToHumidor }: Props) {
             <div style={{ color: 'var(--color-amber)', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem' }}>
               {priceDisplay}
             </div>
-            <Link
-              href={`/account/ashtray/${nameToSlug(group.name)}?new=1`}
-              onClick={onClose}
-              style={{
-                display: 'inline-block',
-                marginTop: '0.65rem',
-                padding: '0.4rem 0.85rem',
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                background: 'transparent',
-                color: 'var(--color-terracotta)',
-                border: '1px solid var(--color-terracotta)',
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              + Add to My Ashtray
-            </Link>
+            {actions.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.65rem' }}>
+                {actions.map(a => (
+                  <Link
+                    key={a.href}
+                    href={a.href}
+                    onClick={onClose}
+                    style={{
+                      display: 'inline-block',
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      background: 'transparent',
+                      color: 'var(--color-terracotta)',
+                      border: '1px solid var(--color-terracotta)',
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {a.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
