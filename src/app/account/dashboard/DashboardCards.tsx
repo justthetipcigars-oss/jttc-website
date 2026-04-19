@@ -14,6 +14,7 @@ const cards: Card[] = [
   { label: 'Wishlist',         desc: 'Saved cigars and notifications',   href: '/account/wishlist', img: '/images/icon-wishlist.png' },
   { label: 'My Humidor',       desc: 'Cigars in your collection',        href: '/account/humidor',  img: '/images/icon-humidor.png' },
   { label: 'My Ashtray',       desc: 'Cigars you have smoked & rated',   href: '/account/ashtray',  img: '/images/icon-ashtray.png' },
+  { label: 'My Pipes',         desc: 'Pipes, cellar & tasting guide',    href: '/account/pipes',    icon: 'Pipes' },
 ];
 
 export default function DashboardCards({ avatarUrl }: { avatarUrl?: string | null }) {
@@ -49,7 +50,18 @@ export default function DashboardCards({ avatarUrl }: { avatarUrl?: string | nul
                   <img src={imgSrc} alt={card.label} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '2px' }} />
                 )
               ) : (
-                <span style={{ fontSize: '1.75rem' }}>{card.icon}</span>
+                <div style={{
+                  width: 48, height: 48,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'var(--color-charcoal-mid)',
+                  border: '1px dashed var(--color-charcoal-light)',
+                  color: 'var(--color-smoke)',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}>
+                  {card.icon}
+                </div>
               )}
             </div>
             <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--color-cream)', fontSize: '1rem', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>

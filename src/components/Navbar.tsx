@@ -22,6 +22,7 @@ const accountLinks = [
   { label: 'Purchase History',   href: '/account/history'   },
   { label: 'My Humidor',         href: '/account/humidor'   },
   { label: 'My Ashtray',         href: '/account/ashtray'   },
+  { label: 'My Pipes',           href: '/account/pipes'     },
 ];
 
 export default function Navbar() {
