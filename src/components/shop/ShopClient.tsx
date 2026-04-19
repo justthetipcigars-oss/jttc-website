@@ -8,7 +8,7 @@ import ProductModal from './CigarModal';
 import { ProductGroup, groupByName } from '@/lib/productGroups';
 import { nameToSlug } from '@/lib/slug';
 
-type Tab = 'cigars' | 'swag' | 'all';
+type Tab = 'cigars' | 'pipes' | 'tobacco' | 'swag' | 'all';
 type ShowQty = 'singles' | 'boxes' | 'both';
 
 const SWAG_CATEGORY = 'JTTC Swag';
@@ -34,6 +34,8 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
   }
 
   const cigars = useMemo(() => products.filter(p => p.isCigar), [products]);
+  const pipes = useMemo(() => products.filter(p => p.isPipe), [products]);
+  const tobacco = useMemo(() => products.filter(p => p.isPipeTobacco), [products]);
   const swagVariants = useMemo(() => products.filter(p => p.category === SWAG_CATEGORY), [products]);
   const nonSwag = useMemo(() => products.filter(p => p.category !== SWAG_CATEGORY), [products]);
 
@@ -42,13 +44,19 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
 
   // All tabs use the same groupByName → same table modal
   const allCigarGroups = useMemo(() => groupByName(cigars).filter(hasStock), [cigars]);
+  const allPipeGroups = useMemo(() => groupByName(pipes).filter(hasStock), [pipes]);
+  const allTobaccoGroups = useMemo(() => groupByName(tobacco).filter(hasStock), [tobacco]);
   const allSwagGroups = useMemo(() => groupByName(swagVariants).filter(hasStock), [swagVariants]);
   const allNonSwagGroups = useMemo(() => groupByName(nonSwag).filter(hasStock), [nonSwag]);
 
   const brands = useMemo(() => {
-    const source = tab === 'all' ? nonSwag : cigars;
+    const source =
+      tab === 'pipes'   ? pipes :
+      tab === 'tobacco' ? tobacco :
+      tab === 'all'     ? nonSwag :
+                          cigars;
     return [...new Set(source.filter(p => p.brand).map(p => p.brand))].sort();
-  }, [tab, cigars, nonSwag]);
+  }, [tab, cigars, pipes, tobacco, nonSwag]);
 
   // Filtered cigar groups
   const filteredCigarGroups = useMemo(() => {
@@ -73,6 +81,32 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
     const q = search.toLowerCase();
     return allSwagGroups.filter(g => g.name.toLowerCase().includes(q));
   }, [allSwagGroups, search]);
+
+  // Generic brand+search filter used by pipes and tobacco
+  function filterByBrandAndSearch(groups: ProductGroup[]) {
+    let out = groups;
+    if (selectedBrand) out = out.filter(g => g.brand === selectedBrand);
+    if (search) {
+      const q = search.toLowerCase();
+      out = out.filter(g =>
+        g.name.toLowerCase().includes(q) ||
+        g.brand.toLowerCase().includes(q) ||
+        g.variants.some(v => v.size.toLowerCase().includes(q))
+      );
+    }
+    return out;
+  }
+
+  const filteredPipeGroups = useMemo(
+    () => filterByBrandAndSearch(allPipeGroups),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allPipeGroups, selectedBrand, search]
+  );
+  const filteredTobaccoGroups = useMemo(
+    () => filterByBrandAndSearch(allTobaccoGroups),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allTobaccoGroups, selectedBrand, search]
+  );
 
   // Filtered all-products groups (non-swag + swag combined)
   const filteredAllNonSwag = useMemo(() => {
@@ -104,8 +138,10 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
   });
 
   const countDisplay = () => {
-    if (tab === 'swag') return `${filteredSwagGroups.length} item${filteredSwagGroups.length !== 1 ? 's' : ''}`;
-    if (tab === 'cigars') return `${filteredCigarGroups.length} product${filteredCigarGroups.length !== 1 ? 's' : ''}`;
+    if (tab === 'swag')    return `${filteredSwagGroups.length} item${filteredSwagGroups.length !== 1 ? 's' : ''}`;
+    if (tab === 'cigars')  return `${filteredCigarGroups.length} product${filteredCigarGroups.length !== 1 ? 's' : ''}`;
+    if (tab === 'pipes')   return `${filteredPipeGroups.length} product${filteredPipeGroups.length !== 1 ? 's' : ''}`;
+    if (tab === 'tobacco') return `${filteredTobaccoGroups.length} product${filteredTobaccoGroups.length !== 1 ? 's' : ''}`;
     const total = filteredAllNonSwag.length + filteredSwagGroups.length;
     return `${total} product${total !== 1 ? 's' : ''}`;
   };
@@ -120,10 +156,20 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
     <div className="max-w-7xl mx-auto px-6 py-12">
 
       {/* Tabs */}
-      <div className="flex gap-0 mb-8" style={{ borderBottom: '1px solid var(--color-charcoal-mid)' }}>
+      <div className="flex flex-wrap gap-0 mb-8" style={{ borderBottom: '1px solid var(--color-charcoal-mid)' }}>
         <button style={tabStyle(tab === 'cigars')} onClick={() => setTab('cigars')}>
           Cigars ({allCigarGroups.length})
         </button>
+        {allPipeGroups.length > 0 && (
+          <button style={tabStyle(tab === 'pipes')} onClick={() => setTab('pipes')}>
+            Pipes ({allPipeGroups.length})
+          </button>
+        )}
+        {allTobaccoGroups.length > 0 && (
+          <button style={tabStyle(tab === 'tobacco')} onClick={() => setTab('tobacco')}>
+            Pipe Tobacco ({allTobaccoGroups.length})
+          </button>
+        )}
         {swagVariants.length > 0 && (
           <button style={tabStyle(tab === 'swag')} onClick={() => setTab('swag')}>
             JTTC Swag ({allSwagGroups.length})
@@ -151,39 +197,39 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
         />
 
         {tab !== 'swag' && (
-          <>
-            <select
-              value={selectedBrand}
-              onChange={e => setSelectedBrand(e.target.value)}
-              className="px-4 py-2 text-sm"
-              style={{
-                background: 'var(--color-charcoal)',
-                border: '1px solid var(--color-charcoal-mid)',
-                color: selectedBrand ? 'var(--color-cream)' : 'var(--color-smoke)',
-              }}
-            >
-              <option value="">All Brands</option>
-              {brands.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
+          <select
+            value={selectedBrand}
+            onChange={e => setSelectedBrand(e.target.value)}
+            className="px-4 py-2 text-sm"
+            style={{
+              background: 'var(--color-charcoal)',
+              border: '1px solid var(--color-charcoal-mid)',
+              color: selectedBrand ? 'var(--color-cream)' : 'var(--color-smoke)',
+            }}
+          >
+            <option value="">All Brands</option>
+            {brands.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+        )}
 
-            <div className="flex" style={{ border: '1px solid var(--color-charcoal-mid)' }}>
-              {(['singles', 'boxes', 'both'] as ShowQty[]).map(q => (
-                <button
-                  key={q}
-                  onClick={() => setShowQty(q)}
-                  className="px-4 py-2 text-xs font-semibold tracking-widest uppercase"
-                  style={{
-                    background: showQty === q ? 'var(--color-charcoal-mid)' : 'transparent',
-                    color: showQty === q ? 'var(--color-cream)' : 'var(--color-smoke)',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </>
+        {(tab === 'cigars' || tab === 'all') && (
+          <div className="flex" style={{ border: '1px solid var(--color-charcoal-mid)' }}>
+            {(['singles', 'boxes', 'both'] as ShowQty[]).map(q => (
+              <button
+                key={q}
+                onClick={() => setShowQty(q)}
+                className="px-4 py-2 text-xs font-semibold tracking-widest uppercase"
+                style={{
+                  background: showQty === q ? 'var(--color-charcoal-mid)' : 'transparent',
+                  color: showQty === q ? 'var(--color-cream)' : 'var(--color-smoke)',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -197,6 +243,44 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
         filteredCigarGroups.length === 0 ? <EmptyState /> : (
           <ProductGrid>
             {filteredCigarGroups.map(g => (
+              <ProductTile
+                key={g.name}
+                imageUrl={g.imageUrl}
+                label={g.brand}
+                name={g.name}
+                sub={`${g.variants.length} variant${g.variants.length !== 1 ? 's' : ''}`}
+                price={tilePrice(g)}
+                onQuickView={() => openQuickView(g)}
+              />
+            ))}
+          </ProductGrid>
+        )
+      )}
+
+      {/* ── Pipes tab ── */}
+      {tab === 'pipes' && (
+        filteredPipeGroups.length === 0 ? <EmptyState /> : (
+          <ProductGrid>
+            {filteredPipeGroups.map(g => (
+              <ProductTile
+                key={g.name}
+                imageUrl={g.imageUrl}
+                label={g.brand}
+                name={g.name}
+                sub={`${g.variants.length} variant${g.variants.length !== 1 ? 's' : ''}`}
+                price={tilePrice(g)}
+                onQuickView={() => openQuickView(g)}
+              />
+            ))}
+          </ProductGrid>
+        )
+      )}
+
+      {/* ── Pipe Tobacco tab ── */}
+      {tab === 'tobacco' && (
+        filteredTobaccoGroups.length === 0 ? <EmptyState /> : (
+          <ProductGrid>
+            {filteredTobaccoGroups.map(g => (
               <ProductTile
                 key={g.name}
                 imageUrl={g.imageUrl}
