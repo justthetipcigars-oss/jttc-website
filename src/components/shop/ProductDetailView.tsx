@@ -144,7 +144,7 @@ export default function ProductDetailView({ group, localImages }: Props) {
   const slug = nameToSlug(group.name);
   const actions: Array<{ label: string; href: string }> = [];
   if (isCigar)       actions.push({ label: '+ Add to My Ashtray',         href: `/account/ashtray/${slug}?new=1` });
-  if (isPipe)        actions.push({ label: '+ Add to My Pipe Collection', href: `/account/pipes/collection/${slug}?new=1` });
+  if (isPipe)        actions.push({ label: '+ Add to My Pipe Collection', href: `/account/pipes/collection/add?product_slug=${slug}` });
   if (isPipeTobacco) actions.push({ label: '+ Add to My Cellar',          href: `/account/pipes/cellar/${slug}?new=1` });
   if (isPipeTobacco) actions.push({ label: '+ Add to My Tasting Guide',   href: `/account/pipes/tasting-guide/${slug}?new=1` });
 
