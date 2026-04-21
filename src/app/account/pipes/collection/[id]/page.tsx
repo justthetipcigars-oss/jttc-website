@@ -46,7 +46,7 @@ export default async function PipeDetailPage({ params }: { params: Promise<{ id:
         <div className="max-w-4xl mx-auto px-6 py-16">
 
           <a href="/account/pipes/collection" style={{ color: 'var(--color-smoke)', fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
-            ← My Pipe Collection
+            ← My Pipe Rack
           </a>
 
           <div style={{ marginTop: '1.5rem', marginBottom: '3rem' }}>

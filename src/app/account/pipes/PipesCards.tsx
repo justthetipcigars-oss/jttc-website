@@ -8,10 +8,9 @@ type Card = {
 };
 
 const cards: Card[] = [
-  { label: 'My Pipe Collection', desc: 'Every pipe on the rack',         href: '/account/pipes/collection',    placeholder: 'Collection' },
+  { label: 'My Pipe Rack',       desc: 'Every pipe on the rack',         href: '/account/pipes/collection',    placeholder: 'Rack' },
   { label: 'My Cellar',          desc: 'Tins, tubs & aging tobaccos',    href: '/account/pipes/cellar',        placeholder: 'Cellar' },
   { label: 'My Tasting Guide',   desc: 'Blends you have smoked & rated', href: '/account/pipes/tasting-guide', placeholder: 'Tasting' },
-  { label: 'Pipe Catalog',       desc: 'Every pipe we have ever carried',href: '/account/pipes/catalog',       placeholder: 'Catalog' },
 ];
 
 export default function PipesCards() {

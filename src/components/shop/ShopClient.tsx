@@ -500,7 +500,7 @@ function ProductTile({ imageUrl, label, name, sub, price, onQuickView, isPipe = 
               textDecoration: 'none',
             }}
           >
-            + My Pipe Collection
+            + My Pipe Rack
           </a>
         )}
       </div>

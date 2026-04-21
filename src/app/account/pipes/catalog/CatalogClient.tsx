@@ -92,10 +92,10 @@ function CatalogTile({ group, inCollection }: { group: ProductGroup; inCollectio
         </div>
       )}
 
-      <div style={{ aspectRatio: '1 / 1', background: 'var(--color-pitch)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '3 / 2', background: 'var(--color-charcoal-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '0.5rem' }}>
         {group.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={group.imageUrl} alt={group.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={group.imageUrl} alt={group.name} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
         ) : (
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>No Image</span>
         )}

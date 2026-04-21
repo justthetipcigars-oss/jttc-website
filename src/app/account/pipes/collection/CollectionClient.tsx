@@ -135,11 +135,27 @@ export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; pho
           }}
         />
         <a
-          href="/account/pipes/collection/new"
+          href="/account/pipes/catalog"
           style={{
             padding: '0.55rem 1.25rem',
             background: 'var(--color-terracotta)',
             color: 'var(--color-pitch)',
+            fontSize: '0.75rem',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            textDecoration: 'none',
+            fontWeight: 600,
+          }}
+        >
+          + Add from Our Catalog
+        </a>
+        <a
+          href="/account/pipes/collection/new"
+          style={{
+            padding: '0.55rem 1.25rem',
+            background: 'transparent',
+            color: 'var(--color-terracotta)',
+            border: '1px solid var(--color-terracotta)',
             fontSize: '0.75rem',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',

@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CollectionClient from './CollectionClient';
 
-export const metadata = { title: 'My Pipe Collection | Just The Tip Cigars' };
+export const metadata = { title: 'My Pipe Rack | Just The Tip Cigars' };
 
 export default async function PipeCollectionPage() {
   const supabase = await createClient();
@@ -32,7 +32,7 @@ export default async function PipeCollectionPage() {
               Pipe Smoker&apos;s Kit
             </div>
             <h1 className="display" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, color: 'var(--color-cream)', lineHeight: 1.1 }}>
-              My Pipe Collection
+              My Pipe Rack
             </h1>
           </div>
 
