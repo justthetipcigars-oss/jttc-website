@@ -26,7 +26,13 @@ type Photo = {
   is_primary: boolean;
 };
 
-type HistoryPipe = { name: string; totalQty: number; macro: string };
+type HistoryPipe = {
+  name: string;
+  totalQty: number;
+  macro: string;
+  imageUrls?: string[];
+  lastPurchased?: string | null;
+};
 
 export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; photos: Photo[] }) {
   const [search, setSearch] = useState('');
@@ -217,7 +223,7 @@ export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; pho
               {unloggedHistory.length} pipe{unloggedHistory.length !== 1 ? 's' : ''} not yet in your collection
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(460px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
             {unloggedHistory.map(h => (
               <HistoryCard key={h.name} history={h} />
             ))}
@@ -240,36 +246,67 @@ export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; pho
 
 function HistoryCard({ history }: { history: HistoryPipe }) {
   const slug = nameToSlug(history.name);
+  const images = (history.imageUrls ?? []).slice(0, 3);
+  const lastPurchasedLabel = history.lastPurchased
+    ? new Date(history.lastPurchased).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : null;
+
   return (
-    <div style={{ background: 'var(--color-charcoal)', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
-      <div>
-        <div style={{ color: 'var(--color-cream)', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.3, marginBottom: '0.35rem' }}>
-          {history.name}
+    <div style={{ background: 'var(--color-charcoal)', padding: '1.5rem', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '1.25rem', alignItems: 'stretch' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem', minWidth: 0 }}>
+        <div>
+          <div style={{ color: 'var(--color-cream)', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.3, marginBottom: '0.35rem' }}>
+            {history.name}
+          </div>
+          <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
+            {history.totalQty} unit{history.totalQty !== 1 ? 's' : ''} purchased
+          </div>
+          {lastPurchasedLabel && (
+            <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem', marginTop: '0.2rem' }}>
+              Last purchased {lastPurchasedLabel}
+            </div>
+          )}
         </div>
-        <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
-          {history.totalQty} unit{history.totalQty !== 1 ? 's' : ''} purchased
-        </div>
+        <a
+          href={`/account/pipes/collection/add?product_slug=${slug}&fallback_name=${encodeURIComponent(history.name)}`}
+          style={{
+            display: 'block',
+            textAlign: 'center',
+            padding: '0.55rem 1rem',
+            background: 'transparent',
+            border: '1px solid var(--color-charcoal-mid)',
+            color: 'var(--color-smoke)',
+            fontSize: '0.72rem',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            textDecoration: 'none',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-terracotta)'; e.currentTarget.style.color = 'var(--color-terracotta)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)'; e.currentTarget.style.color = 'var(--color-smoke)'; }}
+        >
+          Add to Collection →
+        </a>
       </div>
-      <a
-        href={`/account/pipes/collection/add?product_slug=${slug}&fallback_name=${encodeURIComponent(history.name)}`}
-        style={{
-          display: 'block',
-          textAlign: 'center',
-          padding: '0.55rem 1rem',
-          background: 'transparent',
-          border: '1px solid var(--color-charcoal-mid)',
-          color: 'var(--color-smoke)',
-          fontSize: '0.72rem',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          textDecoration: 'none',
-          transition: 'all 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-terracotta)'; e.currentTarget.style.color = 'var(--color-terracotta)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)'; e.currentTarget.style.color = 'var(--color-smoke)'; }}
-      >
-        Add to Collection →
-      </a>
+
+      {images.length > 0 && (
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          {images.map((url, i) => (
+            <div
+              key={i}
+              style={{
+                width: 96, height: 96,
+                background: 'var(--color-charcoal-mid)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden', padding: '0.3rem',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={history.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

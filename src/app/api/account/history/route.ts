@@ -9,7 +9,7 @@ const LIFETIME = '2023-07-01T05:00:00Z';
 const CUSTOMER_INDEX_KEY = 'ls:customer_index';
 const CUSTOMER_INDEX_TTL = 60 * 60 * 24; // 24 hours
 const USER_HISTORY_TTL   = 60 * 30;       // 30 minutes per-user cache
-const userHistoryKey     = (id: string) => `ls:history:${id}`;
+const userHistoryKey     = (id: string) => `ls:history:v2:${id}`;
 
 function normalizePhone(p: string | null | undefined) {
   return (p ?? '').replace(/\D/g, '').slice(-10);
@@ -98,6 +98,7 @@ export async function GET() {
 
     // Page through all customer sales
     const productQty: Record<string, number> = {};
+    const productLastPurchased: Record<string, string> = {};
     const salesList: unknown[] = [];
     let cursor: string | null = null;
 
@@ -111,9 +112,14 @@ export async function GET() {
 
       for (const s of data.data) {
         salesList.push(s);
+        const saleDate = s.sale_date as string;
         for (const item of (s.line_items ?? [])) {
           if (item.quantity > 0) {
             productQty[item.product_id] = (productQty[item.product_id] ?? 0) + item.quantity;
+            const prev = productLastPurchased[item.product_id];
+            if (!prev || new Date(saleDate) > new Date(prev)) {
+              productLastPurchased[item.product_id] = saleDate;
+            }
           }
         }
       }
@@ -138,16 +144,39 @@ export async function GET() {
       results.forEach(p => { if (p) details[p.id as string] = p; });
     }
 
-    // Group by base product name, sum quantities
-    const grouped: Record<string, { name: string; totalQty: number; macro: string }> = {};
+    // Group by base product name, sum quantities, collect images + latest date
+    const grouped: Record<string, {
+      name: string;
+      totalQty: number;
+      macro: string;
+      imageUrls: string[];
+      lastPurchased: string | null;
+    }> = {};
     for (const [pid, qty] of Object.entries(productQty)) {
       const p = details[pid];
       if (!p) continue;
       const macro    = parseCategoryMacro(p);
       const baseName = (p.name as string) || 'Unknown';
       const key      = baseName.toLowerCase();
-      if (!grouped[key]) grouped[key] = { name: baseName, totalQty: 0, macro };
+      if (!grouped[key]) grouped[key] = { name: baseName, totalQty: 0, macro, imageUrls: [], lastPurchased: null };
       grouped[key].totalQty += qty;
+
+      // Collect unique images for this product group (up to 3)
+      const imgs = (p.images as Array<{ url: string }> | null) ?? [];
+      const urls: string[] = [];
+      const topImg = p.image_url as string | null;
+      if (topImg && !topImg.includes('placeholder')) urls.push(topImg);
+      for (const i of imgs) if (i.url && !i.url.includes('placeholder')) urls.push(i.url);
+      for (const u of urls) {
+        if (grouped[key].imageUrls.length >= 3) break;
+        if (!grouped[key].imageUrls.includes(u)) grouped[key].imageUrls.push(u);
+      }
+
+      // Track most-recent purchase date across variants of this name
+      const last = productLastPurchased[pid];
+      if (last && (!grouped[key].lastPurchased || new Date(last) > new Date(grouped[key].lastPurchased!))) {
+        grouped[key].lastPurchased = last;
+      }
     }
 
     const all    = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
