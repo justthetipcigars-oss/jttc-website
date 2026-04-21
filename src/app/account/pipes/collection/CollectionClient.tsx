@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { nameToSlug } from '@/lib/slug';
 
 type Pipe = {
   id: string;
@@ -25,8 +26,30 @@ type Photo = {
   is_primary: boolean;
 };
 
+type HistoryPipe = { name: string; totalQty: number; macro: string };
+
 export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; photos: Photo[] }) {
   const [search, setSearch] = useState('');
+  const [history, setHistory] = useState<HistoryPipe[]>([]);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/account/history')
+      .then(r => r.json())
+      .then(j => {
+        if (j.error) setHistoryError(j.error);
+        else setHistory(j.pipes ?? []);
+      })
+      .catch(() => { /* non-fatal */ })
+      .finally(() => setHistoryLoaded(true));
+  }, []);
+
+  const ownedNames = useMemo(() => new Set(pipes.map(p => p.pipe_name.toLowerCase())), [pipes]);
+  const unloggedHistory = useMemo(
+    () => history.filter(h => !ownedNames.has(h.name.toLowerCase())),
+    [history, ownedNames]
+  );
 
   const primaryPhotoByPipe = useMemo(() => {
     const m = new Map<string, string>();
@@ -166,6 +189,71 @@ export default function CollectionClient({ pipes, photos }: { pipes: Pipe[]; pho
           <TileGrid pipes={retired} primaryPhotoByPipe={primaryPhotoByPipe} dim />
         </section>
       )}
+
+      {/* From Purchase History */}
+      {historyLoaded && historyError !== 'not_linked' && unloggedHistory.length > 0 && (
+        <section style={{ marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-charcoal-mid)', paddingBottom: '0.75rem' }}>
+            <h2 style={{ color: 'var(--color-cream)', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
+              From Your Purchase History
+            </h2>
+            <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>
+              {unloggedHistory.length} pipe{unloggedHistory.length !== 1 ? 's' : ''} not yet in your collection
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
+            {unloggedHistory.map(h => (
+              <HistoryCard key={h.name} history={h} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {historyError === 'not_linked' && pipes.length === 0 && (
+        <div style={{ background: 'var(--color-charcoal)', border: '1px solid var(--color-charcoal-mid)', padding: '1.5rem', marginTop: '1.5rem' }}>
+          <p style={{ color: 'var(--color-smoke)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+            Link your in-store account in{' '}
+            <a href="/account/profile" style={{ color: 'var(--color-terracotta)' }}>My Profile</a>{' '}
+            to pull pipes from your purchase history into your collection.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HistoryCard({ history }: { history: HistoryPipe }) {
+  const slug = nameToSlug(history.name);
+  return (
+    <div style={{ background: 'var(--color-charcoal)', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }}>
+      <div>
+        <div style={{ color: 'var(--color-cream)', fontWeight: 600, fontSize: '0.95rem', lineHeight: 1.3, marginBottom: '0.35rem' }}>
+          {history.name}
+        </div>
+        <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
+          {history.totalQty} unit{history.totalQty !== 1 ? 's' : ''} purchased
+        </div>
+      </div>
+      <a
+        href={`/account/pipes/collection/add?product_slug=${slug}&fallback_name=${encodeURIComponent(history.name)}`}
+        style={{
+          display: 'block',
+          textAlign: 'center',
+          padding: '0.55rem 1rem',
+          background: 'transparent',
+          border: '1px solid var(--color-charcoal-mid)',
+          color: 'var(--color-smoke)',
+          fontSize: '0.72rem',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          textDecoration: 'none',
+          transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-terracotta)'; e.currentTarget.style.color = 'var(--color-terracotta)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-charcoal-mid)'; e.currentTarget.style.color = 'var(--color-smoke)'; }}
+      >
+        Add to Collection →
+      </a>
     </div>
   );
 }

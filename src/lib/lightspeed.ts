@@ -3,6 +3,7 @@ import { redis } from './redis';
 const BASE_URL = process.env.LIGHTSPEED_BASE_URL || 'https://justthetipcigars.retail.lightspeed.app/api/2.0';
 const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
 const CACHE_KEY = 'ls:all_products:v2';
+const PIPES_EVER_CACHE_KEY = 'ls:all_pipes_ever:v1';
 const CACHE_TTL = 3600;
 
 const SWAG_TYPES = new Set([
@@ -44,6 +45,7 @@ export interface LightspeedProduct {
   isCigar: boolean;
   isPipe: boolean;
   isPipeTobacco: boolean;
+  isArchived: boolean;
   sku: string;
   imageUrl: string | null;
   category: string;
@@ -75,6 +77,7 @@ function mapProduct(p: Record<string, unknown>): LightspeedProduct {
     isCigar: isCigarSize(size),
     isPipe: rootCategoryId === PIPES_ROOT_ID,
     isPipeTobacco: rootCategoryId === PIPE_TOBACCO_ROOT_ID,
+    isArchived: !!p.deleted_at || p.is_active === false,
     sku: p.sku as string,
     variantOptions,
     category: (() => {
@@ -204,4 +207,70 @@ export async function fetchAllProducts(): Promise<LightspeedProduct[]> {
 export async function fetchCigars(): Promise<LightspeedProduct[]> {
   const all = await fetchAllProducts();
   return all.filter(p => p.isCigar);
+}
+
+// -------------------------------------------------------------------
+// Pipes Archive — includes every pipe ever carried (active + archived)
+// Used by the /account/pipes/catalog browse page and the collection-add
+// lookup so customers can add a pipe we no longer stock.
+// -------------------------------------------------------------------
+async function fetchAllPipesEverFromAPI(): Promise<LightspeedProduct[]> {
+  if (!TOKEN) throw new Error('LIGHTSPEED_API_TOKEN not set');
+
+  const headers = {
+    'Authorization': `Bearer ${TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+
+  const list: LightspeedProduct[] = [];
+  let after: number | null = null;
+
+  do {
+    let url = `${BASE_URL}/products?page_size=250&deleted=true`;
+    if (after) url += `&after=${after}`;
+
+    const res = await fetch(url, { headers, next: { revalidate: CACHE_TTL } });
+    if (!res.ok) throw new Error(`Lightspeed API error: ${res.status}`);
+
+    const data = await res.json();
+    const page: Record<string, unknown>[] = data.data || [];
+
+    // Only filter out the "Discount" sentinel; keep archived + inactive
+    const mapped = page
+      .map(mapProduct)
+      .filter(p => p.isPipe && p.name !== 'Discount');
+    list.push(...mapped);
+
+    after = page.length === 250 ? (data.version?.max as number) : null;
+  } while (after);
+
+  // Propagate images across variants by name
+  const imageByName: Record<string, string> = {};
+  for (const p of list) {
+    if (p.imageUrl && !imageByName[p.name]) imageByName[p.name] = p.imageUrl;
+  }
+  for (const p of list) {
+    if (!p.imageUrl && imageByName[p.name]) p.imageUrl = imageByName[p.name];
+  }
+
+  return list;
+}
+
+export async function fetchAllPipesEver(): Promise<LightspeedProduct[]> {
+  try {
+    const cached = await redis.get<LightspeedProduct[]>(PIPES_EVER_CACHE_KEY);
+    if (cached) return cached;
+  } catch {
+    // Redis unavailable — fall through
+  }
+
+  const pipes = await fetchAllPipesEverFromAPI();
+
+  try {
+    await redis.set(PIPES_EVER_CACHE_KEY, pipes, { ex: CACHE_TTL });
+  } catch {
+    // non-fatal
+  }
+
+  return pipes;
 }

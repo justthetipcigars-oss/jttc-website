@@ -270,6 +270,7 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
                 sub={`${g.variants.length} variant${g.variants.length !== 1 ? 's' : ''}`}
                 price={tilePrice(g)}
                 onQuickView={() => openQuickView(g)}
+                isPipe
               />
             ))}
           </ProductGrid>
@@ -327,6 +328,7 @@ export default function ShopClient({ products, initialBrand = '' }: { products: 
                 sub={`${g.variants.length} variant${g.variants.length !== 1 ? 's' : ''}`}
                 price={tilePrice(g)}
                 onQuickView={() => openQuickView(g)}
+                isPipe={g.variants.some(v => v.isPipe)}
               />
             ))}
             {filteredSwagGroups.map(g => (
@@ -371,13 +373,14 @@ function EmptyState() {
   );
 }
 
-function ProductTile({ imageUrl, label, name, sub, price, onQuickView }: {
+function ProductTile({ imageUrl, label, name, sub, price, onQuickView, isPipe = false }: {
   imageUrl: string | null;
   label: string;
   name: string;
   sub: string;
   price: string;
   onQuickView: () => void;
+  isPipe?: boolean;
 }) {
   const slug = nameToSlug(name);
   const router = useRouter();
@@ -478,6 +481,28 @@ function ProductTile({ imageUrl, label, name, sub, price, onQuickView }: {
         <div className="font-semibold mt-auto pt-2" style={{ color: 'var(--color-amber)', fontSize: '1rem', borderTop: '1px solid var(--color-charcoal-mid)' }}>
           {price}
         </div>
+
+        {isPipe && (
+          <a
+            href={`/account/pipes/collection/add?product_slug=${slug}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              marginTop: '0.6rem',
+              padding: '0.45rem',
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--color-terracotta)',
+              border: '1px solid var(--color-terracotta)',
+              background: 'transparent',
+              textDecoration: 'none',
+            }}
+          >
+            + My Pipe Collection
+          </a>
+        )}
       </div>
     </div>
   );
