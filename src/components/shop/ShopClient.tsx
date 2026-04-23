@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
+import { useState, useMemo, useTransition, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { LightspeedProduct } from '@/lib/lightspeed';
@@ -12,13 +12,45 @@ type Tab = 'cigars' | 'pipes' | 'tobacco' | 'swag' | 'all';
 type ShowQty = 'singles' | 'boxes' | 'both';
 
 const SWAG_CATEGORY = 'JTTC Swag';
+const VALID_TABS: Tab[] = ['cigars', 'pipes', 'tobacco', 'swag', 'all'];
+const VALID_QTY: ShowQty[] = ['singles', 'boxes', 'both'];
 
-export default function ShopClient({ products, initialBrand = '' }: { products: LightspeedProduct[]; initialBrand?: string }) {
-  const [tab, setTab] = useState<Tab>('cigars');
-  const [showQty, setShowQty] = useState<ShowQty>('both');
-  const [search, setSearch] = useState('');
+export default function ShopClient({
+  products,
+  initialBrand = '',
+  initialTab = '',
+  initialShowQty = '',
+  initialSearch = '',
+}: {
+  products: LightspeedProduct[];
+  initialBrand?: string;
+  initialTab?: string;
+  initialShowQty?: string;
+  initialSearch?: string;
+}) {
+  const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'cigars');
+  const [showQty, setShowQty] = useState<ShowQty>(VALID_QTY.includes(initialShowQty as ShowQty) ? (initialShowQty as ShowQty) : 'both');
+  const [search, setSearch] = useState(initialSearch);
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
+
+  // Mirror filter state to the URL so browser back/forward restores it
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (tab !== 'cigars') params.set('tab', tab);
+      if (showQty !== 'both') params.set('showQty', showQty);
+      if (selectedBrand) params.set('brand', selectedBrand);
+      if (search) params.set('q', search);
+      const qs = params.toString();
+      const next = qs ? `/shop?${qs}` : '/shop';
+      const current = window.location.pathname + window.location.search;
+      if (next !== current) {
+        window.history.replaceState(null, '', next);
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [tab, showQty, selectedBrand, search]);
 
   function openQuickView(group: ProductGroup) {
     // Quick View shows in-stock variants only

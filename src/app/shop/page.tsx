@@ -22,10 +22,19 @@ export const metadata = {
   },
 };
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<{ brand?: string }> }) {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ brand?: string; tab?: string; showQty?: string; q?: string }>;
+}) {
   let products: LightspeedProduct[] = [];
   let error = false;
-  const { brand: initialBrand = '' } = await searchParams;
+  const {
+    brand: initialBrand = '',
+    tab: initialTab = '',
+    showQty: initialShowQty = '',
+    q: initialSearch = '',
+  } = await searchParams;
 
   try {
     products = await fetchAllProducts();
@@ -58,7 +67,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             <p style={{ color: 'var(--color-smoke)' }}>Unable to load products right now. Please try again shortly.</p>
           </div>
         ) : (
-          <ShopClient products={products} initialBrand={initialBrand} />
+          <ShopClient
+            products={products}
+            initialBrand={initialBrand}
+            initialTab={initialTab}
+            initialShowQty={initialShowQty}
+            initialSearch={initialSearch}
+          />
         )}
       </main>
       <Footer />
