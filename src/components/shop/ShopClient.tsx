@@ -52,6 +52,21 @@ export default function ShopClient({
     return () => clearTimeout(timer);
   }, [tab, showQty, selectedBrand, search]);
 
+  // Restore filter state from the URL on browser back/forward (popstate)
+  useEffect(() => {
+    function syncFromUrl() {
+      const p = new URLSearchParams(window.location.search);
+      const t = p.get('tab') ?? '';
+      const q = p.get('showQty') ?? '';
+      setTab(VALID_TABS.includes(t as Tab) ? (t as Tab) : 'cigars');
+      setShowQty(VALID_QTY.includes(q as ShowQty) ? (q as ShowQty) : 'both');
+      setSelectedBrand(p.get('brand') ?? '');
+      setSearch(p.get('q') ?? '');
+    }
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, []);
+
   function openQuickView(group: ProductGroup) {
     // Quick View shows in-stock variants only
     const inStock = group.variants.filter(v => v.stockAmount > 0);
