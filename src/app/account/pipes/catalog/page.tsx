@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CatalogClient from './CatalogClient';
-import { fetchAllPipesEver } from '@/lib/lightspeed';
+import { fetchAllProducts } from '@/lib/lightspeed';
 import { groupByName } from '@/lib/productGroups';
 
 export const metadata = { title: 'Pipe Catalog | Just The Tip Cigars' };
@@ -14,7 +14,8 @@ export default async function PipeCatalogPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/account/login');
 
-  const pipes = await fetchAllPipesEver().catch(() => []);
+  const products = await fetchAllProducts().catch(() => []);
+  const pipes = products.filter(p => p.isPipe);
   const groups = groupByName(pipes);
 
   // Which product IDs are already in this user's collection (hide add button)
