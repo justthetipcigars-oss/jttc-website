@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useTransition, useEffect } from 'react';
+import { useState, useMemo, useTransition, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LightspeedProduct } from '@/lib/lightspeed';
 import ProductModal from './CigarModal';
 import { ProductGroup, groupByName } from '@/lib/productGroups';
@@ -28,13 +28,19 @@ export default function ShopClient({
   initialShowQty?: string;
   initialSearch?: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [tab, setTab] = useState<Tab>(VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'cigars');
   const [showQty, setShowQty] = useState<ShowQty>(VALID_QTY.includes(initialShowQty as ShowQty) ? (initialShowQty as ShowQty) : 'both');
   const [search, setSearch] = useState(initialSearch);
   const [selectedBrand, setSelectedBrand] = useState(initialBrand);
   const [openProduct, setOpenProduct] = useState<ProductGroup | null>(null);
 
-  // Mirror filter state to the URL so browser back/forward restores it
+  // Track URL writes we initiate so the URL→state effect can ignore them
+  const writingUrlRef = useRef(false);
+
+  // State → URL (debounced). Uses router.replace so useSearchParams stays in sync.
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
@@ -43,29 +49,33 @@ export default function ShopClient({
       if (selectedBrand) params.set('brand', selectedBrand);
       if (search) params.set('q', search);
       const qs = params.toString();
-      const next = qs ? `/shop?${qs}` : '/shop';
+      const target = qs ? `/shop?${qs}` : '/shop';
       const current = window.location.pathname + window.location.search;
-      if (next !== current) {
-        window.history.replaceState(null, '', next);
+      if (target !== current) {
+        writingUrlRef.current = true;
+        router.replace(target, { scroll: false });
       }
     }, 200);
     return () => clearTimeout(timer);
-  }, [tab, showQty, selectedBrand, search]);
+  }, [tab, showQty, selectedBrand, search, router]);
 
-  // Restore filter state from the URL on browser back/forward (popstate)
+  // URL → state. Reactive: fires on browser back/forward via useSearchParams.
   useEffect(() => {
-    function syncFromUrl() {
-      const p = new URLSearchParams(window.location.search);
-      const t = p.get('tab') ?? '';
-      const q = p.get('showQty') ?? '';
-      setTab(VALID_TABS.includes(t as Tab) ? (t as Tab) : 'cigars');
-      setShowQty(VALID_QTY.includes(q as ShowQty) ? (q as ShowQty) : 'both');
-      setSelectedBrand(p.get('brand') ?? '');
-      setSearch(p.get('q') ?? '');
+    if (writingUrlRef.current) {
+      writingUrlRef.current = false;
+      return;
     }
-    window.addEventListener('popstate', syncFromUrl);
-    return () => window.removeEventListener('popstate', syncFromUrl);
-  }, []);
+    const t = searchParams.get('tab') ?? '';
+    const q = searchParams.get('showQty') ?? '';
+    const nextTab: Tab = VALID_TABS.includes(t as Tab) ? (t as Tab) : 'cigars';
+    const nextQty: ShowQty = VALID_QTY.includes(q as ShowQty) ? (q as ShowQty) : 'both';
+    const nextBrand = searchParams.get('brand') ?? '';
+    const nextSearch = searchParams.get('q') ?? '';
+    setTab(prev => prev === nextTab ? prev : nextTab);
+    setShowQty(prev => prev === nextQty ? prev : nextQty);
+    setSelectedBrand(prev => prev === nextBrand ? prev : nextBrand);
+    setSearch(prev => prev === nextSearch ? prev : nextSearch);
+  }, [searchParams]);
 
   function openQuickView(group: ProductGroup) {
     // Quick View shows in-stock variants only
