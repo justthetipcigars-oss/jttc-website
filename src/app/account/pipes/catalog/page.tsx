@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import CatalogClient from './CatalogClient';
 import { fetchAllProducts } from '@/lib/lightspeed';
 import { groupByName } from '@/lib/productGroups';
+import { parsePipeSpecs } from '@/lib/pipeSpecs';
 
 export const metadata = { title: 'Pipe Catalog | Just The Tip Cigars' };
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,11 @@ export default async function PipeCatalogPage() {
 
   const products = await fetchAllProducts().catch(() => []);
   const pipes = products.filter(p => p.isPipe);
-  const groups = groupByName(pipes);
+  const groups = groupByName(pipes).map(g => {
+    const desc = g.variants.find(v => v.description)?.description ?? '';
+    const shape = parsePipeSpecs(desc).shape ?? null;
+    return { ...g, shape };
+  });
 
   // Which product IDs are already in this user's collection (hide add button)
   const { data: ownedRows } = await supabase

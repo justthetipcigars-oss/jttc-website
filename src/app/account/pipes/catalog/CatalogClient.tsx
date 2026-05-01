@@ -5,64 +5,149 @@ import { nameToSlug } from '@/lib/slug';
 import WishlistHeart from '@/components/shop/WishlistHeart';
 import type { ProductGroup } from '@/lib/productGroups';
 
+type CatalogGroup = ProductGroup & { shape: string | null };
+
 type Props = {
-  groups: ProductGroup[];
+  groups: CatalogGroup[];
   ownedIds: string[];
+};
+
+type Sort = 'name' | 'price-asc' | 'price-desc';
+
+const inputStyle: React.CSSProperties = {
+  background: 'var(--color-charcoal)',
+  border: '1px solid var(--color-charcoal-mid)',
+  color: 'var(--color-cream)',
+  padding: '0.55rem 0.75rem',
+  fontSize: '0.875rem',
+  outline: 'none',
 };
 
 export default function CatalogClient({ groups, ownedIds }: Props) {
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(true);
+  const [brand, setBrand] = useState('');
+  const [shape, setShape] = useState('');
+  const [sort, setSort] = useState<Sort>('name');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   const owned = useMemo(() => new Set(ownedIds), [ownedIds]);
 
+  const brandOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of groups) if (g.brand) set.add(g.brand);
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [groups]);
+
+  const shapeOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of groups) if (g.shape) set.add(g.shape);
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [groups]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return groups.filter(g => {
+    const min = parseFloat(minPrice);
+    const max = parseFloat(maxPrice);
+    const hasMin = !isNaN(min);
+    const hasMax = !isNaN(max);
+
+    const result = groups.filter(g => {
       const anyActive = g.variants.some(v => !v.isArchived);
       if (!showArchived && !anyActive) return false;
-      if (!q) return true;
-      return g.name.toLowerCase().includes(q) || g.brand.toLowerCase().includes(q);
+      if (brand && g.brand !== brand) return false;
+      if (shape && g.shape !== shape) return false;
+      if (hasMin && g.maxPrice < min) return false;
+      if (hasMax && g.minPrice > max) return false;
+      if (q && !(g.name.toLowerCase().includes(q) || g.brand.toLowerCase().includes(q))) return false;
+      return true;
     });
-  }, [groups, search, showArchived]);
 
-  const brands = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const g of groups) m.set(g.brand, (m.get(g.brand) ?? 0) + 1);
-    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [groups]);
+    if (sort === 'price-asc') result.sort((a, b) => a.minPrice - b.minPrice);
+    else if (sort === 'price-desc') result.sort((a, b) => b.minPrice - a.minPrice);
+    else result.sort((a, b) => a.name.localeCompare(b.name));
+
+    return result;
+  }, [groups, search, showArchived, brand, shape, sort, minPrice, maxPrice]);
+
+  const activeFilterCount = (brand ? 1 : 0) + (shape ? 1 : 0) + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0);
+  const clearAll = () => { setBrand(''); setShape(''); setMinPrice(''); setMaxPrice(''); setSearch(''); };
 
   return (
     <div>
       {/* Toolbar */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1.25rem' }}>
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name or brand…"
-          style={{
-            flex: '1 1 260px', maxWidth: 400,
-            background: 'var(--color-charcoal)',
-            border: '1px solid var(--color-charcoal-mid)',
-            color: 'var(--color-cream)',
-            padding: '0.55rem 1rem',
-            fontSize: '0.875rem',
-            outline: 'none',
-          }}
+          style={{ ...inputStyle, flex: '1 1 260px', maxWidth: 400 }}
         />
+        <select value={brand} onChange={e => setBrand(e.target.value)} style={{ ...inputStyle, minWidth: 160 }}>
+          <option value="">All Brands</option>
+          {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
+        </select>
+        <select value={shape} onChange={e => setShape(e.target.value)} style={{ ...inputStyle, minWidth: 140 }}>
+          <option value="">All Shapes</option>
+          {shapeOptions.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={sort} onChange={e => setSort(e.target.value as Sort)} style={{ ...inputStyle, minWidth: 160 }}>
+          <option value="name">Sort: Name (A–Z)</option>
+          <option value="price-asc">Sort: Price (Low → High)</option>
+          <option value="price-desc">Sort: Price (High → Low)</option>
+        </select>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', letterSpacing: '0.05em' }}>$</span>
+          <input
+            type="number" min="0" step="1"
+            value={minPrice}
+            onChange={e => setMinPrice(e.target.value)}
+            placeholder="Min"
+            style={{ ...inputStyle, width: 80 }}
+          />
+          <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem' }}>–</span>
+          <input
+            type="number" min="0" step="1"
+            value={maxPrice}
+            onChange={e => setMaxPrice(e.target.value)}
+            placeholder="Max"
+            style={{ ...inputStyle, width: 80 }}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '2rem' }}>
         <label style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
           <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
           Include discontinued
         </label>
+        {activeFilterCount > 0 && (
+          <button
+            onClick={clearAll}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--color-charcoal-mid)',
+              color: 'var(--color-smoke)',
+              fontSize: '0.7rem',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              padding: '0.35rem 0.8rem',
+              cursor: 'pointer',
+            }}
+          >
+            Clear filters
+          </button>
+        )}
         <span style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', marginLeft: 'auto' }}>
-          {filtered.length} of {groups.length} · {brands.length} brands
+          {filtered.length} of {groups.length} · {brandOptions.length} brands
         </span>
       </div>
 
       {filtered.length === 0 ? (
         <div style={{ padding: '3rem', textAlign: 'center', border: '1px dashed var(--color-charcoal-mid)' }}>
-          <p style={{ color: 'var(--color-smoke)' }}>No pipes match that search.</p>
+          <p style={{ color: 'var(--color-smoke)' }}>No pipes match those filters.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1px', background: 'var(--color-charcoal-mid)' }}>
@@ -75,7 +160,7 @@ export default function CatalogClient({ groups, ownedIds }: Props) {
   );
 }
 
-function CatalogTile({ group, inCollection }: { group: ProductGroup; inCollection: boolean }) {
+function CatalogTile({ group, inCollection }: { group: CatalogGroup; inCollection: boolean }) {
   const slug = nameToSlug(group.name);
   const firstVariant = group.variants[0];
   const allArchived = group.variants.every(v => v.isArchived);
