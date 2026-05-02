@@ -161,18 +161,22 @@ function CatalogTile({ group, inCollection }: { group: CatalogGroup; inCollectio
     ? `$${group.minPrice.toFixed(2)}`
     : `From $${group.minPrice.toFixed(2)}`;
 
+  const detailHref = `/account/pipes/catalog/${slug}`;
+
   return (
     <div style={{ background: 'var(--color-charcoal)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
-      <div style={{ aspectRatio: '3 / 2', background: 'var(--color-charcoal-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '0.5rem' }}>
-        {group.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={group.imageUrl} alt={group.name} loading="lazy" decoding="async" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
-        ) : (
-          <span style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>No Image</span>
-        )}
-      </div>
+      <a href={detailHref} style={{ display: 'block', textDecoration: 'none' }}>
+        <div style={{ aspectRatio: '3 / 2', background: 'var(--color-charcoal-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '0.5rem' }}>
+          {group.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={group.imageUrl} alt={group.name} loading="lazy" decoding="async" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
+          ) : (
+            <span style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>No Image</span>
+          )}
+        </div>
+      </a>
 
-      <div>
+      <a href={detailHref} style={{ textDecoration: 'none' }}>
         <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
           {group.brand}
         </div>
@@ -182,7 +186,7 @@ function CatalogTile({ group, inCollection }: { group: CatalogGroup; inCollectio
         <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
           {priceDisplay}
         </div>
-      </div>
+      </a>
 
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: 'auto', paddingTop: '0.5rem' }}>
         <WishlistHeart
