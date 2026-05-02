@@ -349,10 +349,10 @@ function PipeTile({ pipe, photoUrl, dim }: { pipe: Pipe; photoUrl: string | null
       onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-charcoal-mid)')}
       onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-charcoal)')}
     >
-      <div style={{ aspectRatio: '1 / 1', background: 'var(--color-pitch)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '1 / 1', background: 'var(--color-charcoal-mid)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '0.5rem' }}>
         {photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl} alt={pipe.pipe_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={photoUrl} alt={pipe.pipe_name} loading="lazy" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
         ) : (
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>No Photo</span>
         )}
