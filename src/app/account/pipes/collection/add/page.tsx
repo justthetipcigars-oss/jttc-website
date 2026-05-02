@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { fetchAllProducts } from '@/lib/lightspeed';
+import { fetchAllPipesEver } from '@/lib/lightspeed';
 import { nameToSlug } from '@/lib/slug';
 import { parsePipeSpecs } from '@/lib/pipeSpecs';
 
@@ -14,8 +14,8 @@ export default async function AddFromCatalogPage({ searchParams }: { searchParam
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/account/login');
 
-  const products = await fetchAllProducts().catch(() => []);
-  const pipes = products.filter(p => p.isPipe);
+  const allPipes = await fetchAllPipesEver().catch(() => []);
+  const pipes = allPipes.filter(p => !p.isDeleted && (p.price ?? 0) > 0);
   const product = pipes.find(p => nameToSlug(p.name) === product_slug);
 
   // Catalog match — create pipe with full prefill

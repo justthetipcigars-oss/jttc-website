@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CatalogClient from './CatalogClient';
-import { fetchAllProducts } from '@/lib/lightspeed';
+import { fetchAllPipesEver } from '@/lib/lightspeed';
 import { groupByName } from '@/lib/productGroups';
 import { parsePipeSpecs } from '@/lib/pipeSpecs';
 
@@ -15,8 +15,8 @@ export default async function PipeCatalogPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/account/login');
 
-  const products = await fetchAllProducts().catch(() => []);
-  const pipes = products.filter(p => p.isPipe);
+  const allPipes = await fetchAllPipesEver().catch(() => []);
+  const pipes = allPipes.filter(p => !p.isDeleted && (p.price ?? 0) > 0);
   const groups = groupByName(pipes).map(g => {
     const desc = g.variants.find(v => v.description)?.description ?? '';
     const shape = parsePipeSpecs(desc).shape ?? null;

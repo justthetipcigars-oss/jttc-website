@@ -3,7 +3,7 @@ import { redis } from './redis';
 const BASE_URL = process.env.LIGHTSPEED_BASE_URL || 'https://justthetipcigars.retail.lightspeed.app/api/2.0';
 const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
 const CACHE_KEY = 'ls:all_products:v2';
-const PIPES_EVER_CACHE_KEY = 'ls:all_pipes_ever:v1';
+const PIPES_EVER_CACHE_KEY = 'ls:all_pipes_ever:v2';
 const CACHE_TTL = 3600;
 
 const SWAG_TYPES = new Set([
@@ -46,6 +46,7 @@ export interface LightspeedProduct {
   isPipe: boolean;
   isPipeTobacco: boolean;
   isArchived: boolean;
+  isDeleted: boolean;
   sku: string;
   imageUrl: string | null;
   category: string;
@@ -78,6 +79,7 @@ function mapProduct(p: Record<string, unknown>): LightspeedProduct {
     isPipe: rootCategoryId === PIPES_ROOT_ID,
     isPipeTobacco: rootCategoryId === PIPE_TOBACCO_ROOT_ID,
     isArchived: !!p.deleted_at || p.is_active === false,
+    isDeleted: !!p.deleted_at,
     sku: p.sku as string,
     variantOptions,
     category: (() => {

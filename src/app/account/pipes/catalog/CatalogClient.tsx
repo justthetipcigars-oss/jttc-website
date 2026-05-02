@@ -25,7 +25,6 @@ const inputStyle: React.CSSProperties = {
 
 export default function CatalogClient({ groups, ownedIds }: Props) {
   const [search, setSearch] = useState('');
-  const [showArchived, setShowArchived] = useState(true);
   const [brand, setBrand] = useState('');
   const [shape, setShape] = useState('');
   const [sort, setSort] = useState<Sort>('name');
@@ -54,8 +53,6 @@ export default function CatalogClient({ groups, ownedIds }: Props) {
     const hasMax = !isNaN(max);
 
     const result = groups.filter(g => {
-      const anyActive = g.variants.some(v => !v.isArchived);
-      if (!showArchived && !anyActive) return false;
       if (brand && g.brand !== brand) return false;
       if (shape && g.shape !== shape) return false;
       if (hasMin && g.maxPrice < min) return false;
@@ -69,7 +66,7 @@ export default function CatalogClient({ groups, ownedIds }: Props) {
     else result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [groups, search, showArchived, brand, shape, sort, minPrice, maxPrice]);
+  }, [groups, search, brand, shape, sort, minPrice, maxPrice]);
 
   const activeFilterCount = (brand ? 1 : 0) + (shape ? 1 : 0) + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0);
   const clearAll = () => { setBrand(''); setShape(''); setMinPrice(''); setMaxPrice(''); setSearch(''); };
@@ -119,10 +116,6 @@ export default function CatalogClient({ groups, ownedIds }: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '2rem' }}>
-        <label style={{ color: 'var(--color-smoke)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-          <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
-          Include discontinued
-        </label>
         {activeFilterCount > 0 && (
           <button
             onClick={clearAll}
@@ -163,24 +156,17 @@ export default function CatalogClient({ groups, ownedIds }: Props) {
 function CatalogTile({ group, inCollection }: { group: CatalogGroup; inCollection: boolean }) {
   const slug = nameToSlug(group.name);
   const firstVariant = group.variants[0];
-  const allArchived = group.variants.every(v => v.isArchived);
 
   const priceDisplay = group.minPrice === group.maxPrice
     ? `$${group.minPrice.toFixed(2)}`
     : `From $${group.minPrice.toFixed(2)}`;
 
   return (
-    <div style={{ background: 'var(--color-charcoal)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative', opacity: allArchived ? 0.8 : 1 }}>
-      {allArchived && (
-        <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'rgba(0,0,0,0.8)', color: 'var(--color-smoke)', fontSize: '0.6rem', padding: '3px 8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--color-charcoal-mid)' }}>
-          Discontinued
-        </div>
-      )}
-
+    <div style={{ background: 'var(--color-charcoal)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
       <div style={{ aspectRatio: '3 / 2', background: 'var(--color-charcoal-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '0.5rem' }}>
         {group.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={group.imageUrl} alt={group.name} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
+          <img src={group.imageUrl} alt={group.name} loading="lazy" decoding="async" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
         ) : (
           <span style={{ color: 'var(--color-smoke)', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>No Image</span>
         )}
@@ -194,7 +180,7 @@ function CatalogTile({ group, inCollection }: { group: CatalogGroup; inCollectio
           {group.name}
         </div>
         <div style={{ color: 'var(--color-smoke)', fontSize: '0.72rem' }}>
-          {allArchived ? 'Previously carried' : priceDisplay}
+          {priceDisplay}
         </div>
       </div>
 
