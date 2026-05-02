@@ -5,7 +5,6 @@ import Footer from '@/components/Footer';
 import PipeDetailView from '@/components/pipes/PipeDetailView';
 import { fetchAllPipesEver } from '@/lib/lightspeed';
 import { groupByName } from '@/lib/productGroups';
-import { parsePipeSpecs } from '@/lib/pipeSpecs';
 import { nameToSlug } from '@/lib/slug';
 
 export const dynamic = 'force-dynamic';
@@ -21,9 +20,6 @@ export default async function PipeCatalogDetailPage({ params }: { params: Promis
   const pipes = allPipes.filter(p => !p.isDeleted && (p.price ?? 0) > 0);
   const group = groupByName(pipes).find(g => nameToSlug(g.name) === slug);
   if (!group) notFound();
-
-  const description = group.variants.find(v => v.description)?.description ?? '';
-  const specs = parsePipeSpecs(description);
 
   const { data: ownedRows } = await supabase
     .from('user_pipes')
@@ -42,7 +38,7 @@ export default async function PipeCatalogDetailPage({ params }: { params: Promis
             ← Pipe Catalog
           </a>
           <div style={{ marginTop: '1.5rem' }}>
-            <PipeDetailView group={group} specs={specs} inCollection={inCollection} />
+            <PipeDetailView group={group} inCollection={inCollection} />
           </div>
         </div>
       </main>

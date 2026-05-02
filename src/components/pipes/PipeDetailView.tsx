@@ -3,32 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { ProductGroup } from '@/lib/productGroups';
-import type { PipeSpecs } from '@/lib/pipeSpecs';
 import { nameToSlug } from '@/lib/slug';
 import WishlistHeart from '@/components/shop/WishlistHeart';
 
 type Props = {
   group: ProductGroup;
-  specs: PipeSpecs;
   inCollection: boolean;
 };
 
-const SPEC_LABELS: Array<[keyof PipeSpecs, string]> = [
-  ['shape', 'Shape'],
-  ['finish', 'Finish'],
-  ['material', 'Material'],
-  ['country', 'Country'],
-  ['length', 'Length'],
-  ['weight', 'Weight'],
-  ['bowl_height', 'Bowl Height'],
-  ['chamber_depth', 'Chamber Depth'],
-  ['chamber_diameter', 'Chamber Diameter'],
-  ['outside_diameter', 'Outside Diameter'],
-  ['stem_material', 'Stem Material'],
-  ['filter', 'Filter'],
-];
-
-export default function PipeDetailView({ group, specs, inCollection }: Props) {
+export default function PipeDetailView({ group, inCollection }: Props) {
   const slug = nameToSlug(group.name);
   const firstVariant = group.variants[0];
   const images = [...new Set(group.variants.flatMap(v => v.allImages))];
@@ -41,10 +24,8 @@ export default function PipeDetailView({ group, specs, inCollection }: Props) {
     ? `$${group.minPrice.toFixed(2)}`
     : `From $${group.minPrice.toFixed(2)}`;
 
-  const specRows = SPEC_LABELS.filter(([k]) => specs[k]);
-
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '3rem' }}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div>
         <div style={{ aspectRatio: '1 / 1', background: 'var(--color-charcoal-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '1rem' }}>
           {gallery.length > 0 ? (
@@ -75,9 +56,9 @@ export default function PipeDetailView({ group, specs, inCollection }: Props) {
         )}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+      <div className="flex flex-col gap-4">
         {group.brand && (
-          <div style={{ color: 'var(--color-terracotta)', fontSize: '0.7rem', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+          <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
             {group.brand}
           </div>
         )}
@@ -87,8 +68,13 @@ export default function PipeDetailView({ group, specs, inCollection }: Props) {
         <div style={{ color: 'var(--color-amber)', fontSize: '1.2rem', fontWeight: 700 }}>
           {priceDisplay}
         </div>
-
-        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginTop: '0.5rem' }}>
+        {description && (
+          <div
+            style={{ color: 'var(--color-smoke)', fontSize: '0.9rem', lineHeight: 1.7, marginTop: '0.5rem' }}
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
+        )}
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginTop: '0.75rem' }}>
           <WishlistHeart
             variant={{
               id: firstVariant.id,
@@ -124,34 +110,6 @@ export default function PipeDetailView({ group, specs, inCollection }: Props) {
             </Link>
           )}
         </div>
-
-        {specRows.length > 0 && (
-          <div style={{ marginTop: '1rem', borderTop: '1px solid var(--color-charcoal-mid)', paddingTop: '1rem' }}>
-            <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              Specs
-            </div>
-            <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.4rem 1.25rem', margin: 0, fontSize: '0.85rem' }}>
-              {specRows.map(([k, label]) => (
-                <div key={k} style={{ display: 'contents' }}>
-                  <dt style={{ color: 'var(--color-smoke)' }}>{label}</dt>
-                  <dd style={{ color: 'var(--color-cream)', margin: 0 }}>{specs[k]}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        )}
-
-        {description && (
-          <div style={{ marginTop: '1rem', borderTop: '1px solid var(--color-charcoal-mid)', paddingTop: '1rem' }}>
-            <div style={{ color: 'var(--color-terracotta)', fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              Details
-            </div>
-            <div
-              style={{ color: 'var(--color-smoke)', fontSize: '0.9rem', lineHeight: 1.7 }}
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
