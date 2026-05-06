@@ -4,11 +4,17 @@ type Tab = { href: string; label: string };
 
 const TABS: Tab[] = [
   { href: '/admin/events',    label: 'Events' },
+  { href: '/admin/inventory', label: 'Inventory' },
   { href: '/admin/sentiment', label: 'Customer Sentiment' },
 ];
 
-export default function AdminNav({ active }: { active: 'events' | 'sentiment' }) {
-  const activeHref = active === 'events' ? '/admin/events' : '/admin/sentiment';
+type ActiveTab = 'events' | 'inventory' | 'sentiment';
+
+export default function AdminNav({ active }: { active: ActiveTab }) {
+  const activeHref =
+    active === 'events'    ? '/admin/events' :
+    active === 'inventory' ? '/admin/inventory' :
+                             '/admin/sentiment';
 
   return (
     <div style={{

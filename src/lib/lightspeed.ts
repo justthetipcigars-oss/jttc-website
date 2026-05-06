@@ -5,6 +5,9 @@ const TOKEN = process.env.LIGHTSPEED_API_TOKEN;
 const CACHE_KEY = 'ls:all_products:v2';
 const CACHE_TTL = 3600;
 
+// Single-outlet store. Looked up once via GET /outlets and pinned here.
+export const OUTLET_ID = '06326976-9d65-11ed-fa40-1373814887fb';
+
 const SWAG_TYPES = new Set([
   'Short Sleeve Tee', 'Hats', 'Beanie', 'Hoodie', 'Trucker',
   'Long Sleeve Tee', 'Shirts', 'Flex Fit', 'Polo',
@@ -204,4 +207,76 @@ export async function fetchAllProducts(): Promise<LightspeedProduct[]> {
 export async function fetchCigars(): Promise<LightspeedProduct[]> {
   const all = await fetchAllProducts();
   return all.filter(p => p.isCigar);
+}
+
+// -------------------------------------------------------------------
+// Inventory writes — STOCKTAKE consignment workflow
+// Used by /admin/inventory to commit stock changes with audit trail.
+// -------------------------------------------------------------------
+function authHeaders() {
+  if (!TOKEN) throw new Error('LIGHTSPEED_API_TOKEN not set');
+  return {
+    'Authorization': `Bearer ${TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+export async function createStocktakeConsignment(name: string): Promise<string> {
+  const res = await fetch(`${BASE_URL}/consignments`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({
+      name,
+      type: 'STOCKTAKE',
+      outlet_id: OUTLET_ID,
+      status: 'OPEN',
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`createStocktakeConsignment failed: ${res.status} ${text}`);
+  }
+  const data = await res.json();
+  const id = data?.data?.id || data?.id;
+  if (!id) throw new Error('No consignment id returned');
+  return id as string;
+}
+
+export async function setConsignmentProductCount(
+  consignmentId: string,
+  productId: string,
+  count: number,
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/consignments/${consignmentId}/products`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({
+      product_id: productId,
+      count,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`setConsignmentProductCount failed for ${productId}: ${res.status} ${text}`);
+  }
+}
+
+export async function commitConsignment(consignmentId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/consignments/${consignmentId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ status: 'RECEIVED' }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`commitConsignment failed: ${res.status} ${text}`);
+  }
+}
+
+export async function invalidateProductsCache(): Promise<void> {
+  try {
+    await redis.del(CACHE_KEY);
+  } catch {
+    // non-fatal
+  }
 }
