@@ -229,7 +229,7 @@ export async function createStocktakeConsignment(name: string): Promise<string> 
       name,
       type: 'STOCKTAKE',
       outlet_id: OUTLET_ID,
-      status: 'OPEN',
+      status: 'STOCKTAKE_SCHEDULED',
     }),
   });
   if (!res.ok) {
@@ -265,7 +265,7 @@ export async function commitConsignment(consignmentId: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/consignments/${consignmentId}`, {
     method: 'PUT',
     headers: authHeaders(),
-    body: JSON.stringify({ status: 'RECEIVED' }),
+    body: JSON.stringify({ status: 'STOCKTAKE_COMPLETE' }),
   });
   if (!res.ok) {
     const text = await res.text();
