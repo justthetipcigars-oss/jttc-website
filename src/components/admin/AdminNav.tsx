@@ -3,15 +3,17 @@ import Link from 'next/link';
 type Tab = { href: string; label: string };
 
 const TABS: Tab[] = [
+  { href: '/admin/dashboard', label: 'JTT Dashboard' },
   { href: '/admin/events',    label: 'Events' },
   { href: '/admin/inventory', label: 'Inventory' },
   { href: '/admin/sentiment', label: 'Customer Sentiment' },
 ];
 
-type ActiveTab = 'events' | 'inventory' | 'sentiment';
+type ActiveTab = 'dashboard' | 'events' | 'inventory' | 'sentiment';
 
 export default function AdminNav({ active }: { active: ActiveTab }) {
   const activeHref =
+    active === 'dashboard' ? '/admin/dashboard' :
     active === 'events'    ? '/admin/events' :
     active === 'inventory' ? '/admin/inventory' :
                              '/admin/sentiment';
