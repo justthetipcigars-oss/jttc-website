@@ -242,6 +242,18 @@ export async function createStocktakeConsignment(name: string): Promise<string> 
   return id as string;
 }
 
+export async function startStocktakeConsignment(consignmentId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/consignments/${consignmentId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ status: 'STOCKTAKE_IN_PROGRESS' }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`startStocktakeConsignment failed: ${res.status} ${text}`);
+  }
+}
+
 export async function setConsignmentProductCount(
   consignmentId: string,
   productId: string,

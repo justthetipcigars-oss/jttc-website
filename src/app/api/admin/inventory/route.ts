@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import {
   createStocktakeConsignment,
+  startStocktakeConsignment,
   setConsignmentProductCount,
   commitConsignment,
   invalidateProductsCache,
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
   let consignmentId: string;
   try {
     consignmentId = await createStocktakeConsignment(consignmentName);
+    await startStocktakeConsignment(consignmentId);
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 502 });
   }
@@ -60,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   if (failures.length === changes.length) {
     return NextResponse.json(
-      { error: 'All product updates failed', consignmentId, failures },
+      { error: `All product updates failed. First: ${failures[0].error}`, consignmentId, failures },
       { status: 502 },
     );
   }
