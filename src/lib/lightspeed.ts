@@ -276,14 +276,18 @@ export async function setConsignmentProductCount(
 }
 
 export async function commitConsignment(consignmentId: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/consignments/${consignmentId}`, {
-    method: 'PUT',
-    headers: authHeaders(),
-    body: JSON.stringify({ status: 'STOCKTAKE_COMPLETE' }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`commitConsignment failed: ${res.status} ${text}`);
+  // STOCKTAKE state machine forbids jumping IN_PROGRESS -> COMPLETE.
+  // Must transition through IN_PROGRESS_PROCESSED first.
+  for (const status of ['STOCKTAKE_IN_PROGRESS_PROCESSED', 'STOCKTAKE_COMPLETE']) {
+    const res = await fetch(`${BASE_URL}/consignments/${consignmentId}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`commitConsignment failed at ${status}: ${res.status} ${text}`);
+    }
   }
 }
 
