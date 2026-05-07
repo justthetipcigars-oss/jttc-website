@@ -259,12 +259,14 @@ export async function setConsignmentProductCount(
   productId: string,
   count: number,
 ): Promise<void> {
+  // STOCKTAKE consignments record the counted value in `received`; `count` is a no-op
+  // for STOCKTAKE_IN_PROGRESS state and triggers "No valid data modification received".
   const res = await fetch(`${BASE_URL}/consignments/${consignmentId}/products`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify({
       product_id: productId,
-      count,
+      received: count,
     }),
   });
   if (!res.ok) {
