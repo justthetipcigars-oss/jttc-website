@@ -81,7 +81,7 @@ async function fetchProductsByIds(ids: string[], token: string | undefined): Pro
 }
 
 export async function GET(request: NextRequest) {
-  const user = await requireRole(['manager']);
+  const user = await requireRole(['admin']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {

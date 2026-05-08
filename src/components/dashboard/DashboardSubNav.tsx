@@ -14,7 +14,7 @@ type Item = {
 const ITEMS: Item[] = [
   { href: '/admin/dashboard',              label: 'Sales Reports',      allowed: ['manager'],     match: p => p === '/admin/dashboard' },
   { href: '/admin/dashboard/customers',    label: 'Customers',          allowed: ['manager'],     match: p => p.startsWith('/admin/dashboard/customers') },
-  { href: '/admin/dashboard/products',     label: 'Product Movement',   allowed: ['manager'],     match: p => p.startsWith('/admin/dashboard/products') },
+  { href: '/admin/dashboard/products',     label: 'Product Movement',   allowed: ['admin'],       match: p => p.startsWith('/admin/dashboard/products') },
   { href: '/admin/dashboard/tobacconist',  label: "Tobacconist's View", allowed: ['tobacconist'], match: p => p.startsWith('/admin/dashboard/tobacconist') },
 ];
 
