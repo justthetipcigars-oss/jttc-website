@@ -4,13 +4,14 @@ import { roleSatisfiesAny, type Role } from '@/lib/auth-shared';
 type Tab = { href: string; label: string; allowed: Role[] };
 
 const TABS: Tab[] = [
-  { href: '/admin/dashboard', label: 'JTT Dashboard',     allowed: ['tobacconist'] },
-  { href: '/admin/events',    label: 'Events',            allowed: ['manager']     },
-  { href: '/admin/inventory', label: 'Inventory',         allowed: ['manager']     },
-  { href: '/admin/sentiment', label: 'Customer Sentiment', allowed: ['admin']      },
+  { href: '/admin/dashboard', label: 'JTT Dashboard',      allowed: ['tobacconist'] },
+  { href: '/admin/events',    label: 'Events',             allowed: ['manager']     },
+  { href: '/admin/inventory', label: 'Inventory',          allowed: ['manager']     },
+  { href: '/admin/sentiment', label: 'Customer Sentiment', allowed: ['admin']       },
+  { href: '/admin/users',     label: 'Users',              allowed: ['admin']       },
 ];
 
-type ActiveTab = 'dashboard' | 'events' | 'inventory' | 'sentiment';
+type ActiveTab = 'dashboard' | 'events' | 'inventory' | 'sentiment' | 'users';
 
 export default function AdminNav({ active, role }: { active: ActiveTab; role: Role }) {
   const visibleTabs = TABS.filter(t => roleSatisfiesAny(role, t.allowed));
@@ -19,7 +20,8 @@ export default function AdminNav({ active, role }: { active: ActiveTab; role: Ro
     active === 'dashboard' ? '/admin/dashboard' :
     active === 'events'    ? '/admin/events' :
     active === 'inventory' ? '/admin/inventory' :
-                             '/admin/sentiment';
+    active === 'sentiment' ? '/admin/sentiment' :
+                             '/admin/users';
 
   return (
     <div style={{
