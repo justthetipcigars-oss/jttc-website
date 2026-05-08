@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { requireRole } from '@/lib/auth';
 
 const MAX_SIZE     = 10 * 1024 * 1024; // 10 MB — posters can be larger
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!);
-  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
-  return profile?.is_admin ? user : null;
-}
-
 export async function POST(req: NextRequest) {
-  const user = await requireAdmin();
+  const user = await requireRole(['manager']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const form = await req.formData();

@@ -1,22 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { requireRole } from '@/lib/auth';
 import { fetchAllCustomers } from '@/lib/dashboard-lightspeed';
 
 const BASE_URL = 'https://justthetipcigars.retail.lightspeed.app/api/2.0';
 const LIFETIME = '2023-07-01T05:00:00Z';
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-  );
-  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
-  return profile?.is_admin ? user : null;
-}
 
 type SalesEntry = { visitCount: number; lastVisit: string | null; products: Record<string, number> };
 
@@ -54,7 +41,7 @@ async function fetchSalesMap(): Promise<Record<string, SalesEntry>> {
 }
 
 export async function GET() {
-  const user = await requireAdmin();
+  const user = await requireRole(['tobacconist']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {

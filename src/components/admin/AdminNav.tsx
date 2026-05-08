@@ -1,17 +1,20 @@
 import Link from 'next/link';
+import { roleSatisfiesAny, type Role } from '@/lib/auth-shared';
 
-type Tab = { href: string; label: string };
+type Tab = { href: string; label: string; allowed: Role[] };
 
 const TABS: Tab[] = [
-  { href: '/admin/dashboard', label: 'JTT Dashboard' },
-  { href: '/admin/events',    label: 'Events' },
-  { href: '/admin/inventory', label: 'Inventory' },
-  { href: '/admin/sentiment', label: 'Customer Sentiment' },
+  { href: '/admin/dashboard', label: 'JTT Dashboard',     allowed: ['tobacconist'] },
+  { href: '/admin/events',    label: 'Events',            allowed: ['manager']     },
+  { href: '/admin/inventory', label: 'Inventory',         allowed: ['manager']     },
+  { href: '/admin/sentiment', label: 'Customer Sentiment', allowed: ['admin']      },
 ];
 
 type ActiveTab = 'dashboard' | 'events' | 'inventory' | 'sentiment';
 
-export default function AdminNav({ active }: { active: ActiveTab }) {
+export default function AdminNav({ active, role }: { active: ActiveTab; role: Role }) {
+  const visibleTabs = TABS.filter(t => roleSatisfiesAny(role, t.allowed));
+
   const activeHref =
     active === 'dashboard' ? '/admin/dashboard' :
     active === 'events'    ? '/admin/events' :
@@ -36,7 +39,7 @@ export default function AdminNav({ active }: { active: ActiveTab }) {
       }}>
         ⚙ Admin
       </div>
-      {TABS.map(t => {
+      {visibleTabs.map(t => {
         const isActive = t.href === activeHref;
         return (
           <Link

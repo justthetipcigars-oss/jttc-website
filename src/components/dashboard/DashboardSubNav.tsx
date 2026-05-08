@@ -2,20 +2,29 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { roleSatisfiesAny, type Role } from '@/lib/auth-shared';
 
-const ITEMS = [
-  { href: '/admin/dashboard',              label: 'Sales Reports',     match: (p: string) => p === '/admin/dashboard' },
-  { href: '/admin/dashboard/customers',    label: 'Customers',         match: (p: string) => p.startsWith('/admin/dashboard/customers') },
-  { href: '/admin/dashboard/products',     label: 'Product Movement',  match: (p: string) => p.startsWith('/admin/dashboard/products') },
-  { href: '/admin/dashboard/tobacconist',  label: "Tobacconist's View", match: (p: string) => p.startsWith('/admin/dashboard/tobacconist') },
+type Item = {
+  href: string;
+  label: string;
+  allowed: Role[];
+  match: (p: string) => boolean;
+};
+
+const ITEMS: Item[] = [
+  { href: '/admin/dashboard',              label: 'Sales Reports',      allowed: ['manager'],     match: p => p === '/admin/dashboard' },
+  { href: '/admin/dashboard/customers',    label: 'Customers',          allowed: ['manager'],     match: p => p.startsWith('/admin/dashboard/customers') },
+  { href: '/admin/dashboard/products',     label: 'Product Movement',   allowed: ['manager'],     match: p => p.startsWith('/admin/dashboard/products') },
+  { href: '/admin/dashboard/tobacconist',  label: "Tobacconist's View", allowed: ['tobacconist'], match: p => p.startsWith('/admin/dashboard/tobacconist') },
 ];
 
-export default function DashboardSubNav() {
+export default function DashboardSubNav({ role }: { role: Role }) {
   const pathname = usePathname() || '';
+  const visible  = ITEMS.filter(item => roleSatisfiesAny(role, item.allowed));
 
   return (
     <nav className="flex flex-wrap gap-1 mb-6 border-b border-gray-800/60">
-      {ITEMS.map(item => {
+      {visible.map(item => {
         const active = item.match(pathname);
         return (
           <Link

@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { requireRole } from '@/lib/auth';
 
 const REPO = 'justthetipcigars-oss/lightspeed-visual-interface';
 const PATH = 'notes.json';
 const API  = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-  );
-  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
-  return profile?.is_admin ? user : null;
-}
 
 function githubHeaders() {
   return {
@@ -47,7 +34,7 @@ async function writeFile(notes: Note[], sha: string, message: string) {
 }
 
 export async function GET() {
-  const user = await requireAdmin();
+  const user = await requireRole(['tobacconist']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
@@ -59,7 +46,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await requireAdmin();
+  const user = await requireRole(['tobacconist']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
@@ -82,7 +69,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const user = await requireAdmin();
+  const user = await requireRole(['tobacconist']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
