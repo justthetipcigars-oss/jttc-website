@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!);
-  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single();
-  return profile?.is_admin ? user : null;
-}
+import { requireRole } from '@/lib/auth';
 
 function getMeta(html: string, property: string): string {
   const patterns = [
@@ -24,7 +14,7 @@ function getMeta(html: string, property: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await requireAdmin();
+  const user = await requireRole(['manager']);
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { url } = await req.json();

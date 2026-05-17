@@ -2,7 +2,7 @@
 -- Admin read access for Customer Sentiment page
 -- =============================================================
 -- Run this once in Supabase → SQL Editor.
--- Lets anyone with profiles.is_admin = true SELECT every row in
+-- Lets anyone with profiles.role = 'admin' SELECT every row in
 -- cigar_journal (not just their own). Non-admin users are
 -- unaffected — their existing "own rows only" policy still applies.
 --
@@ -19,6 +19,6 @@ CREATE POLICY "Admins can read all journal entries"
     EXISTS (
       SELECT 1 FROM public.profiles
       WHERE profiles.id = auth.uid()
-        AND profiles.is_admin = true
+        AND profiles.role = 'admin'
     )
   );

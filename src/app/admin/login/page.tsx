@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { landingPathForRole, type Role } from '@/lib/auth-shared';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -13,12 +14,13 @@ export default function AdminLoginPage() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
 
-  // Auto-redirect if already logged in as admin
+  // Auto-redirect if already logged in with any role
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (data.session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', data.session.user.id).single();
-        if (profile?.is_admin) { router.replace('/admin/events'); return; }
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.session.user.id).single();
+        const role = profile?.role as Role | null | undefined;
+        if (role) { router.replace(landingPathForRole(role)); return; }
       }
       setLoading(false);
     });
@@ -29,15 +31,22 @@ export default function AdminLoginPage() {
     setError('');
 
     setLoading(true);
-    const { error: authErr } = await supabase.auth.signInWithPassword({ email, password });
-    if (authErr) {
+    const { data: signin, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
+    if (authErr || !signin.user) {
       setError('Invalid credentials.');
       setLoading(false);
       return;
     }
 
-    // Verify admin flag server-side via redirect — middleware will reject if not admin
-    router.push('/admin/events');
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', signin.user.id).single();
+    const role = profile?.role as Role | null | undefined;
+    if (!role) {
+      setError('Account does not have admin access.');
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
+    }
+    router.push(landingPathForRole(role));
   }
 
   if (loading) return <main style={{ background: 'var(--color-pitch)', minHeight: '100vh' }} />;

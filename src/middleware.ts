@@ -36,11 +36,11 @@ export async function middleware(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_admin')
+    .select('role')
     .eq('id', user.id)
     .single();
 
-  if (!profile?.is_admin) {
+  if (!profile?.role) {
     if (isAdminApi) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }

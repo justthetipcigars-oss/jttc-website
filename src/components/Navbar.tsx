@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { landingPathForRole, type Role } from '@/lib/auth-shared';
 
 const GOOGLE_REVIEW_URL = 'https://g.page/r/CQ2VJvYGMQFfEAI/review';
 
@@ -29,7 +30,7 @@ export default function Navbar() {
   const [scrolled,      setScrolled]      = useState(false);
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [loggedIn,      setLoggedIn]      = useState(false);
-  const [isAdmin,       setIsAdmin]       = useState(false);
+  const [role,          setRole]          = useState<Role | null>(null);
   const [dropdownOpen,  setDropdownOpen]  = useState(false);
   const [mobileAccOpen, setMobileAccOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -46,10 +47,10 @@ export default function Navbar() {
     async function checkSession(session: { user?: { id: string } } | null) {
       setLoggedIn(!!session);
       if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
-        setIsAdmin(!!profile?.is_admin);
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+        setRole((profile?.role as Role | null) ?? null);
       } else {
-        setIsAdmin(false);
+        setRole(null);
       }
     }
 
@@ -208,10 +209,10 @@ export default function Navbar() {
                     </Link>
                   ))}
 
-                  {/* Admin Editor */}
-                  {isAdmin && (
+                  {/* Admin/Manager/Tobacconist entry */}
+                  {role && (
                     <Link
-                      href="/admin/login"
+                      href={landingPathForRole(role)}
                       onClick={() => setDropdownOpen(false)}
                       style={{
                         display: 'block',
@@ -228,7 +229,7 @@ export default function Navbar() {
                       onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-charcoal)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      ⚙ Admin Editor
+                      ⚙ Admin
                     </Link>
                   )}
 
@@ -352,14 +353,14 @@ export default function Navbar() {
                       {item.label}
                     </Link>
                   ))}
-                  {isAdmin && (
+                  {role && (
                     <Link
-                      href="/admin/login"
+                      href={landingPathForRole(role)}
                       className="block py-2 text-sm"
                       style={{ color: 'var(--color-terracotta)', letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 600 }}
                       onClick={() => setMenuOpen(false)}
                     >
-                      ⚙ Admin Editor
+                      ⚙ Admin
                     </Link>
                   )}
                   <button
